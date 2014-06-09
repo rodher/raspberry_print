@@ -1,0 +1,69 @@
+<h1>Ayuda</h1>
+<hr/>
+<h2>Índice</h2>
+<ul>
+	<li><a href="#info">Información general</a></li>
+	<li><a href="#tech">Detalles técnicos</a></li>
+	<li><a href="#util">Utilidades</a>
+	<ul>
+		<li><a href="#tinta">Cambio de cartuchos de tinta</a></li>
+		<li><a href="#rev">Revisión de los cabezales</a></li>
+		<li><a href="#limp">Limpieza de cabezales</a></li>
+	</ul>
+	</li>
+	<li><a href="#manual">Manual</a></li>
+	<li><a href="#creditos">Créditos</a></li>
+</ul>
+<div id="info"><h2> Información general</h2>
+<p>Esta aplicación web te da acceso a los servicios de impresión y escaneado de la impresora <b>Epson Stylus DX7400</b> situada en el estudio de la casa de la familia Hernangómez Herrero. Para acceder a ella simplemente tienes que teclear en la barra del navegador la dirección <a href="/">192.168.1.200:3000</a>, lo que te llevará a la página de inicio. Para no tener que recordar este número, es recomendable guardarlo dentro de los marcadores de tu ordenador, móvil o tablet.</p></div>
+<hr />
+<div id="tech"><h2>Detalles técnicos</h2>
+<p>Al teclear la dirección del servidor en nuestro navegador, estamos estableciendo una comunicación con la <a href="http://www.raspberrypi.org/" target="_blank">Raspberry Pi </a> que está situada a los pies del ordenador de sobremesa, al lado del router, cuya dirección IP estática privada es la 192.168.1.200.</p>
+
+<p>El detalle de que la IP sea privada es importante porque eso significa que solo podemos acceder al servicio si estamos conectados a la red de casa, ya sea por Wi-Fi o por cable. La desventaja de esto es que, de momento, no podemos imprimir a través de Internet, pero así evitamos que gente ajena a la casa controle la impresora.</p>
+
+<p>Con el "3000" final decimos que queremos acceder al puerto 3000 de la Raspberry Pi, donde está desplegado un servidor web usando <a href="http://nodejs.org/" target="_blank">Node.js</a> y <a href="http://expressjs.com/" target="_blank">Express</a>. Este servidor recibe la información que le enviamos y la procesa para controlar la impresora mediante comandos de Unix. Por esta razón no podemos enviar documentos de Microsoft Office para imprimir, puesto que los sistemas GNU/Linux sólo pueden trabajar con ellos a partir de la suite LibreOffice, que no es del todo compatible y por lo tanto altera el formato de los archivos.</p></div>
+<hr />
+<div id="util"><h2>Utilidades</h2>
+<div id="tinta"><h3>Cambio de cartuchos de tinta</h3>
+Cuando alguno de los cartuchos de tinta se acabe, una luz naranja aparecerá al lado del dibujo con forma de gota que hay en la parte superior izquierda de la impresora. Puedes revisar el estado de los cartuchos de tinta con la utilidad <a href="/ink">Revisar niveles de tinta</a> de la aplicación. En ese momento, se podrá cambiar el cartucho o los cartuchos gastados directamente en la impresora.</p>
+<p>Para ello, tenemos que seguir los siguientes pasos:</p>
+<ol>
+	<li>Levantar la tapa de la impresora.</li>
+	<li>Pulsar brevemente el botón <b>Stop</b>. Verás que el cubilete de cartuchos se desplaza a la izquierda. Si algún cartucho está gastado, la marca de tinta agotada apuntará a él.</li>
+	<li>Pulsa <b>Stop</b> otra vez. Si algún otro cartucho está gastado, el cubilete se moverá hasta que la marca apunte al cartucho agotado. Cuando no haya más cartuchos agotados el cubilete se desplazará a la zona de cambio de cartuchos.</li>
+	<li>Abre la tapa del cubilete.</li>
+	<li>Extrae el/los cartucho/s agotado/s, presionando las pestañas superior e inferior.</li>
+	<li>Agita el nuevo cartucho y sácalo de su envoltorio.</li>
+	<li>Quita la pegatina amarilla del cartucho.</li>
+	<li>Coloca el cartucho nuevo en lugar del cartucho viejo. Tienes que oir un click.</li>
+	<li>Cierra bien la tapa del cubilete y la de la impresora.</li>
+	<li>Pulsa <b>Stop</b>. Esto inicia el proceso de carga de tinta.</li>
+</ol></div><p>
+<div id="rev"><h3>Revisión de los cabezales</h3>
+<p>Si la impresora no imprime correctamente, puede deberse a que los cabezales están sucios. Para comprobarlo, debemos seguir los siguientes pasos:</p>
+<ol>
+	<li>Apaga la impresora y carga papel.</li>
+	<li>Enciéndela mientras mantienes apretado el botón Stop. De esta manera se imprime un patrón de impresión.</li>
+	<li>Si el patrón se imprime con "calvas", necesitas limpiar los cabezales.</li>
+</ol></div>
+<div id="limp"><h3>Limpieza de cabezales</h3>
+<p>Para limpiar los cabezales, primero debes asegurarte de que la impresora está encendida y los cartuchos tienen tinta (No debe estar encendida la luz de la gotita). Una vez seguros de esto, pulsamos el botón Stop durante al menos tres segundos, hasta que parpadee la luz de <b>On</b>. En este momento empieza el ciclo de limpieza de cabezales, que terminará cuando el botón <b>On</b> deje de parpadear. Una vez terminado el proceso, podemos comprobar que los cabezales se han limpiado imprimiendo un patrón.</p></div>
+</div>
+<hr />
+<div id="manual"><h2>Manual</h2>
+<p>Para más información sobre la impresora y las funcionalidades que ofrece de forma autónoma, puedes consultar el <a href="/manual_DX7400.pdf" target="_blank">Manual Epson Stylus DX7400</a>.</p></div>
+<hr />
+<div id="creditos"><h2>Créditos</h2>
+<p>Esta aplicación ha sido creada por Rodrigo Hernangómez para uso y disfrute de su familia. Los conocimientos acerca de la construcción de aplicaciones web han sido adquiridos en la asignatura de Computación en Red impartida en el tercer curso del Grado en Tecnologías y Servicios de Telecomunicación. Los conocimientos acerca de Unix y de la Raspberry Pi han sido adquiridos en la asignatura de Sistemas Digitales II del tercer curso del mismo grado, aunque mayoritariamente se ha trabajado de forma autodidacta ayudado por múltiples tutoriales de Internet.</p>
+<p>Espero que esto sirva para imprimir y escanear en casa de forma más rápida y que solucione más problemas de los que crea. Siento las molestias y trastornos a la hora de implantar este sistema, y confío en que nos acostumbremos de forma intuitiva a él.</p>
+<p>La actual versión de la aplicación es la 1.0, desarrollada entre los meses de mayo y junio de 2014.</p></div>
+
+<a href="/">Inicio</a>
+
+
+
+
+
+
+

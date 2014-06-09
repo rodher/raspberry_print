@@ -1,0 +1,19 @@
+<h2>Escanear</h2>
+
+<form method='post' action='/scan'>
+
+  <div class='field'>
+    Nombre del archivo: <input type="text" name="filename" placeholder="Sin el .jpg o el .pdf"><br>
+    Formato: <br>
+    <input type="radio" name="scan_mode" value="img" checked="checked">Imagen<br>
+	<input type="radio" name="scan_mode" value="pdf">PDF
+  </div>
+
+  <div class="actions">
+    <input name="commit" type="submit" value="Escanear" />
+  </div>
+
+
+</form>
+
+<a href="/"> Inicio</a>

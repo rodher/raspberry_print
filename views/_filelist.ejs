@@ -1,0 +1,15 @@
+<% for(var i in files){ %>
+	<% var ext = files[i].match(/\.[0-9a-z]+$/i); %>
+	<% if(ext) ext = ext[0].toLowerCase(); %>
+	<% if(ext ===".jpg" || ext ===".gif" || ext ===".bmp" || ext ===".png" || ext ===".tiff" ){ %>
+		<a href="/<%= kind %>/show/<%= files[i] %>" target="_blank">
+			<img src='/images/imgicon.png' alt='Img icon' height='20' />
+			<%= files[i] %>
+		</a><br>
+	<%} else if(ext===".pdf"){ %>
+		<a href="/<%= kind %>/show/<%= files[i] %>" target="_blank">
+			<img src='/images/pdficon.png' alt='PDF icon' height='20'/>
+			<%= files[i] %>
+		</a><br>
+	<% } %>
+<% } %>

@@ -1,0 +1,142 @@
+var multiparty = require('multiparty');
+var child = require('child_process');
+var fs = require('fs');
+
+var p_dir = "prints/";
+
+var jobs={}; // Trabajos pendientes: {close, fname, ival}
+
+
+// GET /print
+exports.index = function(req, res, next) {
+
+  res.render("print/index");
+
+};
+
+// POST /print
+exports.print = function(req, res, next) {
+  
+  var form = new multiparty.Form();
+
+  form.on('error', function(error) {
+    console.log(error);
+    next(error);
+  });
+
+  form.on('part', function(part) {
+    if (part.filename) {
+      console.log(part);
+      var out_stream = fs.createWriteStream(p_dir+part.filename.replace(/\s/g,"_"), {flags: 'w', encoding: 'binary', mode: 0644});
+      part.pipe(out_stream);
+    }
+
+  });
+
+  form.parse(req,function(err, fields, files) {
+    if(err){ 
+      console.log(err);
+      next(err);
+    }
+
+    var fname=files.archivo[0].originalFilename;
+    var printjob=[fields.mode[0], 
+                  fields.page_mode[0], 
+                  fields.page_interval[0],
+                  fields.ncopy[0],
+                  fname.replace(/\s/g,"_") ];
+
+    console.log(printjob);
+
+    if(validate(printjob)){
+
+      var id=Date.now();
+      jobs[id]={close: false, fname: fname};
+
+      child.execFile('./bin/print.sh', printjob,function (error, stdout, stderr) {
+        if(error!==null){
+          next(error);
+        }
+        console.log('print stdout:');
+        console.log(stdout);
+        if(stderr){
+          console.log('print stderr:');
+          console.log(stderr);
+        }
+
+      })
+        .on('close',function(code,signal){
+          jobs[id].close=true;
+        });
+
+      res.render("print/sent", {
+
+        fname:fname,
+        printid: id    
+      });     
+    } else{
+      next(new Error('Formulario mal rellenado'));
+    }
+
+  });
+};
+
+exports.result = function(req, res, next) {
+
+  var funcion = function(){
+    if(jobs[req.query.printid].close){
+
+      clearInterval( jobs[req.query.printid].ival);
+      res.render("print/result", {
+        fname:jobs[req.query.printid].fname,
+      });
+
+      delete jobs[req.query.printid];
+
+    }
+  };
+
+  jobs[req.query.printid].ival=setInterval(funcion,0);
+  
+}
+
+exports.inklevels = function(req,res, next){
+
+
+  child.exec('ink -p usb', function (error, stdout, stderr) {
+    console.log('ink stdout: ' + stdout);
+    console.log('ink stderr: ' + stderr);
+    if (error !== null) {
+      next(error);
+    }
+    var inklevels ={};
+    inklevels.cyan=stdout.match(/Cyan:[\s]+([0-9]+)%/)[1];
+    inklevels.magenta=stdout.match(/Magenta:[\s]+([0-9]+)%/)[1];
+    inklevels.yellow=stdout.match(/Yellow:[\s]+([0-9]+)%/)[1];
+    inklevels.black=stdout.match(/Photoblack:[\s]+([0-9]+)%/)[1]; 
+    res.render("ink",{inklevels: inklevels});
+
+  });
+
+};
+
+validate =function(printjob){
+  if(!printjob[4]){
+    return false;
+  }
+  if (printjob[2].match(/([^0-9,\-])|([\-,]{2,})|(^[\-,])|([\-,]$)/)) {
+    return false;
+  };
+  
+
+  return true;
+
+};
+
+
+
+
+
+
+
+

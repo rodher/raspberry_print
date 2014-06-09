@@ -1,5 +1,4 @@
 node_modules
-log/*
-prints/*
-scans/*
-npm-debug.log
+*.jpg
+*.pdf
+*.log

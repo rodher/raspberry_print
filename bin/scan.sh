@@ -2,14 +2,19 @@
 
 # Ejemplo de uso: scan.sh scanmode fname || scan.sh fname
 
-SCAN_DIR='./scans' 
-LOG_DIR='./log'
-MAX_DAYS=30
+#########################
+#		CONSTANTES		#
+#########################
+
+SCAN_DIR='./scans'	# Directorio donde se almacenan los escaneos
+LOG_DIR='./log'		# Directorio donde se almacenan los logs
+MAX_DAYS=30			# Máximo intervalo de días durante los que se almacena un archivo en la aplicacion
 
 #########################
 #		FUNCIONES		#
 #########################
 
+# Funcion para revisar errores
 fntCheckErrors()
 {	
 	FILE_LOG=$1;
@@ -19,6 +24,7 @@ fntCheckErrors()
 	fi
 }
 
+# Funcion para añadir paginas a un pdf
 fntAddPage()
 {
 	echo "Añadiendo página a ${doc}.pdf"
@@ -30,6 +36,7 @@ fntAddPage()
 	echo
 }
 
+# Funcion para escanear
 fntScan()
 {	
 	echo "Escaneando imagen"
@@ -43,14 +50,14 @@ fntScan()
 
 }
 
-
 #########################
 #		PROGRAMA		#
 #########################
 
 echo
-find ${SCAN_DIR}/ -mtime +${MAX_DAYS} -delete
+find ${SCAN_DIR}/ -mtime +${MAX_DAYS} -delete # Borrado de archivos que llevan más de unos ciertos dias almacenados
 
+# Comportamiento si solo se usa un parametro: Modo escanear y añadir pagina
 if [[ $# == 1 ]]; then
 	doc=$1
 	fname=$1_parcial
@@ -58,6 +65,7 @@ if [[ $# == 1 ]]; then
 	fntScan
 	fntAddPage
 
+# Comportamiento si se usan dos parametros: Modo escanear
 elif [[ $# == 2 ]]; then
 
 	fname=$2

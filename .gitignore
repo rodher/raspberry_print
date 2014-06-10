@@ -1,4 +1,4 @@
 node_modules
-*.jpg
-*.pdf
+scans/*
+prints/*
 *.log

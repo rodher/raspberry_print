@@ -2,14 +2,20 @@
 
 # Ejemplo de uso: print.sh colormode pagemode pagelist ncopy file
 
-PRINT_DIR='./prints' 
-LOG_DIR='./log'
-MAX_DAYS=30
+#########################
+#		CONSTANTES		#
+#########################
+
+PRINT_DIR='./prints' 	# Directorio donde se guardan las impresiones
+LOG_DIR='./log'			# Directorio donde se guardan los logs
+MAX_DAYS=30				# Máximo intervalo de días durante los que se almacena un archivo en la aplicacion
 
 #########################
 #		FUNCIONES		#
 #########################
 
+
+# Funcion para revisar errores
 fntCheckErrors()
 {	
 	FILE_LOG=$1;
@@ -19,6 +25,7 @@ fntCheckErrors()
 	fi
 }
 
+# Funcion para pasar imagenes a formato jpg
 fntJPG()
 {
 	echo "Convirtiendo imagen a jpg"
@@ -30,6 +37,7 @@ fntJPG()
 	echo
 }
 
+# Funcion para pasar archivos a blanco y negro
 fntBW() 
 {
 
@@ -40,6 +48,7 @@ fntBW()
 	echo
 }
 
+# Funcion que determina la lista de páginas a imprimir en caso de imprimir pares o impares
 fntParImpar(){
 	echo "Extrayendo la lista de páginas a imprimir"
 	n="`pdftk ${PRINT_DIR}/${file} dump_data output | grep -i Num | grep -E -o [0-9]+`"
@@ -56,6 +65,7 @@ fntParImpar(){
 	echo
 }
 
+# funcion que ejecuta el comando de impresion
 fntLP() 
 {
 
@@ -75,15 +85,17 @@ if [[ $# != 5 ]]; then
 	exit 1
 fi
 
-color_mode=$1
-page_mode=$2
-page_list=$3
-ncopy=$4
-file=$5
-cmd="lp"
-fname="${file%.*}"
-ext="${file##*.}"
+color_mode=$1 		# Valores: color bw
+page_mode=$2	 	# Valores: all interval par impar
+page_list=$3 		# Lista de páginas a imprimir
+ncopy=$4			# Número de copias a imprimir
+file=$5				# Archivo a imprimir
+cmd="lp"			# Comando a ejecutar
+fname="${file%.*}"	# Nombre de archivo sin extension
+ext="${file##*.}"	# Extension del archivo
 
+
+# Obtencion del tipo de archivo: Imagen o PDF
 if [[ "$ext" == "pdf" ]]; then
 	file_mode="pdf"
 
@@ -94,14 +106,12 @@ else
 	exit 1
 fi
 
-
-
 #########################
 #		PROGRAMA		#
 #########################
 
 echo
-find ${PRINT_DIR}/ -mtime +${MAX_DAYS} -delete
+find ${PRINT_DIR}/ -mtime +${MAX_DAYS} -delete # Borrado de archivos que llevan más de unos ciertos dias almacenados
 
 if [[ "$file_mode" == "img" ]]; then
 	if [[ "$ext" != "jpg" ]]; then

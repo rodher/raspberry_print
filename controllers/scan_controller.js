@@ -1,21 +1,27 @@
-var child = require('child_process');
-var fs = require('fs');
+var child = require('child_process');	// Modulo para procesos de terminal
+var fs = require('fs');					// Modulo de archivos de sistema
 
-var s_dir = "scans/";
+var s_dir = "scans/"; // Directorio donde se almacenan los escaneos
+
 var jobs={}; // Trabajos pendientes: {close, fname, mode, pages, ival}
 
+// GET /scan/index
 exports.index = function(req, res, next) {
 
   res.render("scan/index");
 
 };
 
+// POST /scan
 exports.scan = function(req,res,next){
 	
-	var id=Date.now();
+	var id=Date.now(); // Creamos id para el trabajo
+
+	// Añadimos trabajo a la lista de trabajos pendientes
     jobs[id]={close: false, fname: req.body.filename || String(id) , mode: req.body.scan_mode, pages: 1};
     var ext;
 
+    // Determinamos la extension del archivo resultante
 	switch (jobs[id].mode){
 		case "img" :
 			ext=".jpg"
@@ -29,17 +35,20 @@ exports.scan = function(req,res,next){
 			break;
 	}
 
+	// Comprobamos si existe un archivo de igual nombre
   	if(fs.existsSync(s_dir+jobs[id].fname.replace(/\s/g,"_")+ext)){
-  		console.log("Primero compruebo si existe");
+
   		var i=0
   		var name;
+  		// Compruebo cuantos archivos de igual nombre existen y le pongo "nombre(n).ext"
   		do{
   			i++;
   			name=jobs[id].fname+"("+i+")";
   		}while(fs.existsSync(s_dir+name.replace(/\s/g,"_")+ext))
   		jobs[id].fname=name;
   	}
-  	console.log("Luego ejecuto scan");
+
+  	// Ejecutamos el comando de escaneado
 	child.execFile('./bin/scan.sh', [req.body.scan_mode, jobs[id].fname.replace(/\s/g,"_")] ,
 		function (error, stdout, stderr) {
 	      if(error!==null){
@@ -53,18 +62,24 @@ exports.scan = function(req,res,next){
 	      }
 		})
 		.on('close',function(code,signal){
-        	jobs[id].close=true;
+        	jobs[id].close=true; // Cuando se termina de ejecutar ponemos como verdadero el flag close
       	});
 
-
+	// Enviamos la respuesta: "Archivo escaneandose"
 	res.render("scan/sent", {sc_mode: req.body.scan_mode, scanid: id});
 
 }
 
+// GET /scan/result
 exports.result = function(req, res, next){
+
+	// Creamos la funcion de comprobacion de trabajo finalizado
 	var funcion = function(){
 	    if(jobs[req.query.scanid].close){
-	    	clearInterval( jobs[req.query.scanid].ival);
+
+	    	clearInterval( jobs[req.query.scanid].ival); // Terminamos la comprobacion periodica
+
+	    	// Enviamos respuestas distintas dependiendo del modo de escaneado
 			switch (jobs[req.query.scanid].mode){
 				case "img" :
 					res.render("scan/result", {	fname:jobs[req.query.scanid].fname+'.jpg',
@@ -82,12 +97,46 @@ exports.result = function(req, res, next){
 	    }
 	};
 
-	jobs[req.query.scanid].ival=setInterval(funcion,0);
-
+	jobs[req.query.scanid].ival=setInterval(funcion,0); // Comprobamos periodicamente
 }
 
+// POST /scan/add
+exports.add = function(req, res, next){
+
+	jobs[req.body.scanid].close=false; 	// Volvemos a poner como falso el flag close
+	jobs[req.body.scanid].pages++;		// y aumentamos el numero de paginas
+
+	// Ejecuamos nuevamente el comando de escaneo
+	child.execFile('./bin/scan.sh', [jobs[req.body.scanid].fname.replace(/\s/g,"_")] ,
+	function (error, stdout, stderr) {
+      if(error!==null){
+        next(error);
+      }
+      console.log('scan stdout:');
+      console.log(stdout);
+      if(stderr){
+        console.log('scan stderr:');
+        console.log(stderr);
+      }
+	})
+	.on('close',function(code,signal){
+    	jobs[req.body.scanid].close=true; // Cuando se termina de ejecutar ponemos como verdadero el flag close
+  	});
+
+	// Enviamos respuesta: "Archivo escaneandose"
+	res.render("scan/sent", {sc_mode: jobs[req.body.scanid].mode, scanid: req.body.scanid});
+}
+
+// GET /scan/pdf/result
+exports.resultPDF = function(req, res, next){
+	res.render("scan/result", {	fname:jobs[req.query.scanid].fname+'.pdf',
+												scanid: req.query.scanid});
+}
+
+// GET /scan/download
 exports.download = function(req, res, next){
 
+	// Enviamos el archivo escaneado con su extension correspondiente
 	switch (jobs[req.query.scanid].mode){
 		case "img" :
 			res.download(s_dir+jobs[req.query.scanid].fname.replace(/\s/g,"_")+'.jpg', 
@@ -99,7 +148,6 @@ exports.download = function(req, res, next){
 					  			}
 							});
 			break;
-
 		case "pdf" :
 			res.download(s_dir+jobs[req.query.scanid].fname.replace(/\s/g,"_")+'.pdf', 
 									jobs[req.query.scanid].fname+'.pdf', function(err){
@@ -114,38 +162,6 @@ exports.download = function(req, res, next){
 			break;
 	}
 
-
-
+	// Borramos el trabajo de la lista de trabajos
 	delete jobs[req.query.scanid];
-	
-}
-
-exports.add = function(req, res, next){
-
-	jobs[req.body.scanid].close=false;
-	jobs[req.body.scanid].pages++;
-
-	child.execFile('./bin/scan.sh', [jobs[req.body.scanid].fname.replace(/\s/g,"_")] ,
-	function (error, stdout, stderr) {
-      if(error!==null){
-        next(error);
-      }
-      console.log('scan stdout:');
-      console.log(stdout);
-      if(stderr){
-        console.log('scan stderr:');
-        console.log(stderr);
-      }
-	})
-	.on('close',function(code,signal){
-    	jobs[req.body.scanid].close=true;
-  	});
-
-	res.render("scan/sent", {sc_mode: jobs[req.body.scanid].mode, scanid: req.body.scanid});
-
-}
-
-exports.resultPDF = function(req, res, next){
-	res.render("scan/result", {	fname:jobs[req.query.scanid].fname+'.pdf',
-												scanid: req.query.scanid});
 }

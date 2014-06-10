@@ -9,8 +9,11 @@ Pasos para desplegar la aplicación:
 1. Configuración de IP stática de la Raspberry Pi: https://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address
 2. Descarga de paquetes:
     Necesitas instalar CUPS, SANE, Nodejs, Imagemagick, ink y pdftk
+
     http://www.bartbania.com/index.php/cups-raspberry-printer/?utm_source=feedly
+    
     http://blog.pi3g.com/2013/04/raspberry-pi-sharing-a-scanner-with-the-network-even-windows/
+    
     http://revryl.com/2014/01/04/nodejs-raspberry-pi/
     
     sudo apt-get install imagemagick

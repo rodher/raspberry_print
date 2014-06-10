@@ -1,0 +1,37 @@
+#! /bin/bash
+# /etc/init.d/raspberry_print
+
+### BEGIN INIT INFO
+# Provides:        raspberryprint
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:    $remote_fs $syslog
+# Default-Start:    2 3 4 5
+# Default-Stop:        0 1 6
+# Short-Description:    Servidor remoto de impresion
+# Description:        Servidor remoto de impresion
+### END INIT INFO 
+ 
+# Carry out start/stop/restart actions
+case "$1" in
+    start)
+        echo "Iniciando servidor de Raspberry Print"
+        cd /home/pi/raspberry_print && /usr/local/bin/node ./bin/www &> ./log/Node.log & 
+        ;;
+    stop)
+        echo "Parando el servidor de Raspberry Print"
+        killall node
+        ;;
+    restart)
+        echo "Reinicio de Raspberry Print"
+        echo "Parando el servidor de Raspberry Print"
+        killall node
+        echo "Iniciando servidor de Raspberry Print"
+        cd /home/pi/raspberry_print && node ./bin/www &> ./log/Node.log & 
+        ;;
+    *)
+        echo "Uso: /etc/init.d/raspberryprint {start|stop|restart}"
+        exit 1
+        ;;
+esac
+ 
+exit 0

@@ -131,9 +131,9 @@ progress::-moz-progress-bar {
 	border-radius: 3px;
 	box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
 	background:
-		-moz-linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, 0.1) 33%, rgba(0, 0, 0, 0.1) 66%, transparent 66%),
-		-moz-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
-		-moz-linear-gradient(left, #444444, #000000);
+		linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, 0.1) 33%, rgba(0, 0, 0, 0.1) 66%, transparent 66%),
+		linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
+		linear-gradient(left, #444444, #000000);
 	
 	background-size: 1px 15px, 100% 95%, 100% 100%;
 

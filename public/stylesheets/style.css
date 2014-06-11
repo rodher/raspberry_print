@@ -85,11 +85,40 @@ progress::-webkit-progress-bar {
 }
 
 progress::-moz-progress-bar {
-	background:-moz-linear-gradient(top, #CCCCCC, #EEEEEE);
 	border-radius: 3px;
 	padding: 2px;
-	box-shadow: 0 1px 0px 0 rgba(255, 255, 255, 0.2);
+	background-size: 1px 15px, 100% 95%, 100% 100%;
+	box-shadow: 0 1px 0px 0 rgba(255, 255, 255, 0.2),
+		  inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
+
 
 }
 
 
+#cyanbar::-moz-progress-bar {
+	background-image:
+		-moz-linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, 0.1) 33%, rgba(0, 0, 0, 0.1) 66%, transparent 66%),
+		-moz-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
+		-moz-linear-gradient(left, #00F3FF, #00C4CE);
+}
+
+#magbar::-moz-progress-bar {
+	background-image:
+		-moz-linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, 0.1) 33%, rgba(0, 0, 0, 0.1) 66%, transparent 66%),
+		-moz-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
+		-moz-linear-gradient(left, #FF0066, #D20054);
+}
+
+#yellbar::-moz-progress-bar {
+	background-image:
+		-moz-linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, 0.1) 33%, rgba(0, 0, 0, 0.1) 66%, transparent 66%),
+		-moz-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
+		-moz-linear-gradient(left, #FCFF00, #C5C800);
+}
+
+#blackbar::-moz-progress-bar {
+	background-image:
+		linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, 0.1) 33%, rgba(0, 0, 0, 0.1) 66%, transparent 66%),
+		linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
+		linear-gradient(left, #444444, #000000);
+}

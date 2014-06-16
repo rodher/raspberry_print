@@ -40,7 +40,7 @@ fntAddPage()
 fntScan()
 {	
 	echo "Escaneando imagen"
-	scanimage --format=tiff --mode Color > ${SCAN_DIR}/${fname}.tiff 2> ${LOG_DIR}/scan.log
+	scanimage --format=tiff --mode Color --resolution=300 > ${SCAN_DIR}/${fname}.tiff 2> ${LOG_DIR}/scan.log
 	echo "Convirtiendo a ${ext}"
 	convert ${SCAN_DIR}/${fname}.tiff  ${SCAN_DIR}/${fname}.${ext} &>> ${LOG_DIR}/scan.log
 	fntCheckErrors ${LOG_DIR}/scan.log

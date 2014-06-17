@@ -7,8 +7,15 @@ var bodyParser = require('body-parser');
 var partials = require('express-partials');
 
 var routes = require('./routes/index');
+var http = require('http');
 
 var app = express();
+
+var server = http.Server(app);
+
+var io = require('socket.io')(server);
+
+server.listen(3000);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -54,6 +61,15 @@ app.use(function(err, req, res, next) {
         message: err.message,
         error: {}
     });
+});
+
+/// socket.io
+
+io.on('connection', function (socket) {
+  socket.emit('news', { hello: 'world' });
+  socket.on('my other event', function (data) {
+    console.log(data);
+  });
 });
 
 

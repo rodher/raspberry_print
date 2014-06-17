@@ -19,7 +19,7 @@ fntCheckErrors()
 {	
 	FILE_LOG=$1;
 	if [ -n "`grep \"Error:\" ${FILE_LOG}`" ]; then
-		echo "Ha ocurrido un error en el anterior paso. Para más detalles consulta " ${FILE_LOG};
+		echo "Ha ocurrido un error en el anterior paso. Para más detalles consulta " ${FILE_LOG} >&2 ;
 		exit -1;
 	fi
 }
@@ -32,21 +32,18 @@ fntAddPage()
 	fntCheckErrors ${LOG_DIR}/addPage.log
 	mv ${SCAN_DIR}/${doc}_total.pdf  ${SCAN_DIR}/${doc}.pdf
 	rm ${SCAN_DIR}/${fname}.pdf
-	echo "...hecho. Mira los detalles en ${LOG_DIR}/addPage.log"
-	echo
+
 }
 
 # Funcion para escanear
 fntScan()
 {	
 	echo "Escaneando imagen"
-	scanimage --format=tiff --mode Color --resolution=300 > ${SCAN_DIR}/${fname}.tiff 2> ${LOG_DIR}/scan.log
+	scanimage --format=tiff --mode Color --resolution=300 > ${SCAN_DIR}/${fname}.tiff
 	echo "Convirtiendo a ${ext}"
 	convert ${SCAN_DIR}/${fname}.tiff  ${SCAN_DIR}/${fname}.${ext} &>> ${LOG_DIR}/scan.log
 	fntCheckErrors ${LOG_DIR}/scan.log
 	rm ${SCAN_DIR}/${fname}.tiff
-	echo "...hecho. Mira los detalles en ${LOG_DIR}/scan.log"
-	echo
 
 }
 
@@ -54,7 +51,6 @@ fntScan()
 #		PROGRAMA		#
 #########################
 
-echo
 find ${SCAN_DIR}/ -mtime +${MAX_DAYS} -delete # Borrado de archivos que llevan más de unos ciertos dias almacenados
 
 # Comportamiento si solo se usa un parametro: Modo escanear y añadir pagina
@@ -76,14 +72,14 @@ elif [[ $# == 2 ]]; then
 	elif [[ "$1" == "img" ]]; then
 		ext="jpg"
 	else
-		echo "Formato de archivo no admitido"
+		echo "Formato de archivo no admitido" >&2 
 		exit 1
 	fi
 
 	fntScan
 
 else
-	echo "Número de argumentos incorrecto"
+	echo "Número de argumentos incorrecto" >&2
 	exit 1
 fi
 

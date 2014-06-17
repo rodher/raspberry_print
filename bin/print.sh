@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Ejemplo de uso: print.sh colormode pagemode pagelist ncopy file
+# Profundidad de progreso 3
 
 #########################
 #		CONSTANTES		#
@@ -20,7 +21,7 @@ fntCheckErrors()
 {	
 	FILE_LOG=$1;
 	if [ -n "`grep \"Error:\" ${FILE_LOG}`" ]; then
-		echo "Ha ocurrido un error en el anterior paso. Para más detalles consulta " ${FILE_LOG};
+		echo "Ha ocurrido un error en el anterior paso. Para más detalles consulta " ${FILE_LOG} >&2 ;
 		exit -1;
 	fi
 }
@@ -32,9 +33,8 @@ fntJPG()
 	convert ${PRINT_DIR}/${fname}.${ext} -background white -alpha remove ${PRINT_DIR}/${fname}.jpg &> ${LOG_DIR}/convertJPG.log
 	file="${fname}.jpg"
 	fntCheckErrors ${LOG_DIR}/convertJPG.log
+	echo 1 # Primer hito de progreso
 	rm ${PRINT_DIR}/${fname}.${ext}
-	echo "...hecho. Mira los detalles en ${LOG_DIR}/convertJPG.log"
-	echo
 }
 
 # Funcion para pasar archivos a blanco y negro
@@ -44,8 +44,7 @@ fntBW()
 	echo "Pasando imagen a blanco y negro"
 	convert ${PRINT_DIR}/${file} -modulate 100,0 ${PRINT_DIR}/${file} &> ${LOG_DIR}/convertBW.log
 	fntCheckErrors ${LOG_DIR}/convertBW.log
-	echo "...hecho. Mira los detalles en ${LOG_DIR}/convertBW.log"
-	echo
+	echo 2 # Segundo hito de progreso
 }
 
 # Funcion que determina la lista de páginas a imprimir en caso de imprimir pares o impares
@@ -57,12 +56,11 @@ fntParImpar(){
 	elif [[ "${page_mode}" == "par" ]]; then
 		i=2
 	fi
+	echo 1 # Primer hito de progreso
 	page_list=${i}
 	for (( i += 2; i <= n; i+=2 )); do
 		page_list="${page_list},${i}"
 	done
-	echo "...hecho."
-	echo
 }
 
 # funcion que ejecuta el comando de impresion
@@ -72,8 +70,7 @@ fntLP()
 	echo "Imprimiendo"
 	${cmd} -n ${ncopy} ${PRINT_DIR}/${file} &> ${LOG_DIR}/LP.log
 	fntCheckErrors ${LOG_DIR}/LP.log
-	echo "...hecho. Mira los detalles en ${LOG_DIR}/LP.log"
-	echo
+	echo 3 # Tercer hito de progreso
 }
 
 #########################
@@ -81,7 +78,7 @@ fntLP()
 #########################
 
 if [[ $# != 5 ]]; then
-	echo "Número incorrecto de argumentos"
+	echo "Número incorrecto de argumentos" >&2
 	exit 1
 fi
 
@@ -102,7 +99,7 @@ if [[ "$ext" == "pdf" ]]; then
 elif [[ "$ext" == "jpg" || "$ext" == "jpeg" || "$ext" == "JPG" || "$ext" == "gif" || "$ext" == "GIF" || "$ext" == "bmp" || "$ext" == "BMP" || "$ext" == "tiff" || "$ext" == "TIFF" || "$ext" == "png" || "$ext" == "PNG" ]]; then
 	file_mode="img"
 else
-	echo "Formato de archivo no admitido"
+	echo "Formato de archivo no admitido" >&2
 	exit 1
 fi
 
@@ -110,20 +107,13 @@ fi
 #		PROGRAMA		#
 #########################
 
-echo
 find ${PRINT_DIR}/ -mtime +${MAX_DAYS} -delete # Borrado de archivos que llevan más de unos ciertos dias almacenados
 
 if [[ "$file_mode" == "img" ]]; then
 	if [[ "$ext" != "jpg" ]]; then
 		fntJPG
 	fi
-fi
-
-if [[ "$color_mode" == "bw" ]]; then
-	fntBW
-fi
-
-if [[ "$file_mode" == "pdf" ]]; then
+elif [[ "$file_mode" == "pdf" ]]; then
 	if [[ "$page_mode" == "impar" || "$page_mode" == "par"  ]]; then
 		fntParImpar
 	fi
@@ -131,6 +121,10 @@ if [[ "$file_mode" == "pdf" ]]; then
 	if [[ "$page_mode" != "all" ]]; then
 		cmd=${cmd}" -P "${page_list}
 	fi
+fi
+
+if [[ "$color_mode" == "bw" ]]; then
+	fntBW
 fi
 
 fntLP

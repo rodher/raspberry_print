@@ -36,6 +36,12 @@ router.get('/files', fileController.index);
 
 // Ruta de ayuda
 router.get('/help', function(req, res, next){
+	req.io.on('connection', function (socket) {
+	  socket.emit('news', { hello: 'world', page: 'help' });
+	  socket.on('my other event', function (data) {
+	    console.log(data);
+	  });
+	});
 	res.render('help');
 });
 

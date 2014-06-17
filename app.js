@@ -29,6 +29,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(partials());
 
+// Helper para hacer accesibles los sockets en los controladores
+app.use(function(req,res,next){
+    req.io =io;
+    next();
+});
+
 app.use('/', routes);
 
 
@@ -62,15 +68,5 @@ app.use(function(err, req, res, next) {
         error: {}
     });
 });
-
-/// socket.io
-
-io.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
-});
-
 
 module.exports = app;

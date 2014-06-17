@@ -67,7 +67,7 @@ fntParImpar(){
 fntLP() 
 {
 
-	echo "Imprimiendo"
+	echo "Mandando impresión"
 	${cmd} -n ${ncopy} ${PRINT_DIR}/${file} &> ${LOG_DIR}/LP.log
 	fntCheckErrors ${LOG_DIR}/LP.log
 	echo 3 # Tercer hito de progreso

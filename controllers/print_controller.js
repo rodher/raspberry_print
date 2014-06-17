@@ -61,7 +61,7 @@ exports.print = function(req, res, next) {
       jobs[id]={close: false, fname: fname}; // Añadimos el trabajo a la lista de trabajos pendientes
 
       //Ejecutamos el comando de impresion
-      child.execFile('./bin/print.sh', printjob,function (error, stdout, stderr) {
+      var print = child.spawn('./bin/print.sh', printjob,function (error, stdout, stderr) {
         if(error!==null){
           next(error);
         }
@@ -71,10 +71,22 @@ exports.print = function(req, res, next) {
           console.log('print stderr:');
           console.log(stderr);
         }
-      })
-        .on('close',function(code,signal){
-          jobs[id].close=true; // Cuando se termina de ejecutar ponemos como verdadero el flag close  
+      });
+
+      req.io.on('connection', function (socket){
+        print.stdout.on('data', function (data) {
+          var progress = data.match(/[0-9]+/);
+          if(progress) socket.emit('progress', { progress: progress[0] });
+          else socket.emit('message', { msg: data});
         });
+
+        print.on('close',function (code){
+            if(code===0){
+              socket.emit('message', { msg: "Imprimiendo"});
+            }
+        });
+      });
+
 
       // Enviamos respuesta, el archivo esta preparandose para imprimir
       res.render("print/sent", {

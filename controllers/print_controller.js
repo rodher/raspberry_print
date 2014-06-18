@@ -57,7 +57,9 @@ exports.print = function(req, res, next) {
       //Ejecutamos el comando de impresion
       var print = child.spawn('./bin/print.sh', printjob);
 
+      // Conectamos con el socket
       req.io.on('connection', function (socket){
+        // Enviamos información a través del socket
         print.stdout.on('data', function (data) {
           var progress = String(data).match(/[0-9]+/);
           if(progress) socket.emit('progress', { progress: progress[0] });
@@ -65,9 +67,9 @@ exports.print = function(req, res, next) {
         });
 
         print.on('close',function (code){
-            if(code===0) socket.emit('message', { msg: "Imprimiendo"});
+            if(code===0) socket.emit('cmdend', { msg: "Imprimiendo"});
             else{ 
-              socket.emit('message', { msg: "Error al imprimir"});
+              socket.emit('cmdend', { msg: "Error al imprimir"});
               next(new Error("Error de impresión"));
             }
         });

@@ -12,7 +12,7 @@ function submitForm(){
 
 }
 
-var socket = io.connect('http://localhost:3000');
+var socket = io.connect('http://192.168.1.200:3000');
 
 socket.on('progress', function (data) {
 	console.log(data);

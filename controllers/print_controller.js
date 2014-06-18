@@ -61,17 +61,7 @@ exports.print = function(req, res, next) {
       jobs[id]={close: false, fname: fname}; // Añadimos el trabajo a la lista de trabajos pendientes
 
       //Ejecutamos el comando de impresion
-      var print = child.spawn('./bin/print.sh', printjob,function (error, stdout, stderr) {
-        if(error!==null){
-          next(error);
-        }
-        console.log('print stdout:');
-        console.log(stdout);
-        if(stderr){
-          console.log('print stderr:');
-          console.log(stderr);
-        }
-      });
+      var print = child.spawn('./bin/print.sh', printjob);
 
       req.io.on('connection', function (socket){
         print.stdout.on('data', function (data) {

@@ -20,5 +20,5 @@ socket.on('progress', function (data) {
 
 socket.on('message', function (data) {
 	console.log(data);
-	$("#msg").html(data);
+	$("#msg").html(data.msg);
 });

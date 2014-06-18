@@ -13,8 +13,7 @@ router.get('/', function(req, res) {
 
 // Rutas de impresion
 router.get('/print/index',  printController.index);
-router.post('/print',  printController.print); 
-router.get('/print/result', printController.result);
+router.post('/print',  printController.print);
 
 // Ruta de comprobacion de tinta
 router.get('/ink',  printController.inklevels);

@@ -4,9 +4,6 @@ var fs = require('fs');                 // Modulo de archivos de sistema
 
 var p_dir = "prints/";  // Directorio donde se almacenan las impresiones
 
-var jobs={}; // Trabajos pendientes: {close, fname, ival}
-
-
 // GET /print
 exports.index = function(req, res, next) {
 
@@ -57,9 +54,6 @@ exports.print = function(req, res, next) {
     // Comprobamos que el formulario esta bien rellenado
     if(validate(printjob)){
 
-      var id=Date.now(); // Creamos un id para el trabajo
-      jobs[id]={close: false, fname: fname}; // Añadimos el trabajo a la lista de trabajos pendientes
-
       //Ejecutamos el comando de impresion
       var print = child.spawn('./bin/print.sh', printjob);
 
@@ -71,8 +65,10 @@ exports.print = function(req, res, next) {
         });
 
         print.on('close',function (code){
-            if(code===0){
-              socket.emit('message', { msg: "Imprimiendo"});
+            if(code===0) socket.emit('message', { msg: "Imprimiendo"});
+            else{ 
+              socket.emit('message', { msg: "Error al imprimir"});
+              next(new Error("Error de impresión"));
             }
         });
       });
@@ -80,35 +76,13 @@ exports.print = function(req, res, next) {
 
       // Enviamos respuesta, el archivo esta preparandose para imprimir
       res.render("print/sent", {
-        fname:fname,
-        printid: id    
+        msg: fname+" enviado con éxito. Preparando archivo para imprimir.",  
       });     
     } else{
       next(new Error('Formulario mal rellenado'));
     }
   });
 };
-
-// GET /print/result
-exports.result = function(req, res, next) {
-
-  // Creamos la funcion de comprobacion de trabajo finalizado
-  var funcion = function(){
-    if(jobs[req.query.printid].close){
-
-      clearInterval(jobs[req.query.printid].ival); // Terminamos la comprobacion periodica
-
-      // Enviamos respuesta
-      res.render("print/result", {
-        fname:jobs[req.query.printid].fname,
-      });
-
-      delete jobs[req.query.printid]; // Eliminamos el trabajo de la lista de trabajos pendientes
-    }
-  };
-
-  jobs[req.query.printid].ival=setInterval(funcion,0); // Comprobamos periodicamente
-}
 
 // GET /ink
 exports.inklevels = function(req,res, next){

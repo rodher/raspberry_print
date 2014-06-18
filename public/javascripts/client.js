@@ -16,6 +16,7 @@ var socket = io.connect('http://192.168.1.200:3000');
 
 socket.on('progress', function (data) {
 	console.log(data);
+	$("progress").val(data.progress);
 });
 
 socket.on('message', function (data) {

@@ -75,7 +75,7 @@ exports.print = function(req, res, next) {
 
       req.io.on('connection', function (socket){
         print.stdout.on('data', function (data) {
-          var progress = data.match(/[0-9]+/);
+          var progress = String(data).match(/[0-9]+/);
           if(progress) socket.emit('progress', { progress: progress[0] });
           else socket.emit('message', { msg: data});
         });

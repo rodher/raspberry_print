@@ -1,16 +1,14 @@
 <h2>Escanear</h2>
 
-<%= pages %><%= pages>1 ? " páginas escaneadas" : " página escaneada"%>
+<div id="msg"></div>
+<progress value="0" max="100"></progress>
 <br>
 <br>
-
-<form id="formpdf">
-	<input type="hidden" name="scanid" value="<%= scanid %>">
+<form method='get' action='/scan/download' onsubmit='download()'>
+	<input id="fname" type="hidden" name="fname" value="<%= fname %>">
+	<input type="hidden" name="ext" value="pdf">
+	<input class="botones" type="button" name="boton" value="Añadir otra página" onclick="add()" />
+	<input class="botones" type="submit" value="Terminar" name="commit" />
 </form>
-<button type="submit" form="formpdf" formmethod="post" formaction="/scan/add">
-	Añadir otra página
-</button>
-<button type="submit" form="formpdf" formmethod="get" formaction="/scan/pdf/result">
-	Terminar
-</button><br><br>
+
 <a href="/"> Inicio</a>

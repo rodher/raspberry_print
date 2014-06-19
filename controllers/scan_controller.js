@@ -58,12 +58,10 @@ exports.scan = function(req,res,next){
 	req.io.on('connection', function (socket){
         scan.stdout.on('data', function (chunk) {
           socket.emit('message', { msg: chunk.toString()});
-          console.log("stdout: "+chunk);
         });
         scan.stderr.on('data', function (chunk) {
         	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%/);
         	if(progress) socket.emit('progress', { progress: progress[1] });
-        	console.log("stderr: "+chunk);
         });
       	scan.on('close',function(code){
       		var evt = req.body.scan_mode+"end";
@@ -75,10 +73,13 @@ exports.scan = function(req,res,next){
               next(new Error("Error de impresión"));
             }
       	});
+
+      	socket.on('add', function (data){
+      		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
+      	});
 	});
 
 	// Enviamos la respuesta: "Archivo escaneandose"
-	//res.render("scan/sent", {sc_mode: req.body.scan_mode, scanid: id});
 	res.render("scan/"+req.body.scan_mode, { fname: fname});
 
 

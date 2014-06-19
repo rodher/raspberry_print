@@ -3,12 +3,11 @@
 <div id="msg"></div>
 <progress value="0" max="100"></progress>
 <br>
-<br>
 <form method='get' action='/scan/download' onsubmit='download()'>
 	<input id="fname" type="hidden" name="fname" value="<%= fname %>">
 	<input type="hidden" name="ext" value="pdf">
 	<input class="botones" type="button" name="boton" value="Añadir otra página" onclick="add()" />
 	<input class="botones" type="submit" value="Terminar" name="commit" />
 </form>
-
+<br>
 <a href="/"> Inicio</a>

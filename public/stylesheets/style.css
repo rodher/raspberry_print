@@ -14,9 +14,18 @@ a {
   color: #00B7FF;
 }
 
-progress {
-	width: 200px;
-	height: 14px;
+th{
+	height: 5px;
+    text-align: center;
+}
+
+td{
+	height: 200px;
+}
+
+.inkbar{
+	height: 40px;
+    width: 200px;
 
 	display: block;
 
@@ -24,10 +33,15 @@ progress {
 	-moz-appearance: none;
 	appearance: none;
 	border: none;
+
+	-webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    transform: rotate(-90deg);
 }
 
 
-progress::-webkit-progress-bar {
+.inkbar::-webkit-progress-bar {
 	background:-webkit-linear-gradient(top, #CCCCCC, #EEEEEE);
 	border-radius: 3px;
 	padding: 2px;

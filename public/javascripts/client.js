@@ -12,9 +12,12 @@ function submitForm(){
 
 }
 
-$(".inkbar").each(function(){
-	if($(this).val()<=10) $(this).attr('id', 'emptybar');
+$(document).ready(function() {
+	$(".inkbar").each(function(){
+		if($(this).val()<=10) $(this).attr('id', 'emptybar');
+	});
 });
+
 
 var socket = io.connect('http://192.168.1.200:3000'); // Conectamos con el servidor
 

@@ -98,6 +98,18 @@ td{
 
 }
 
+#emptybar::-webkit-progress-value {
+	border-radius: 3px;
+	box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
+	background:
+		-webkit-linear-gradient(45deg, transparent, transparent 66%, rgba(0, 0, 0, 0.1) 33%, rgba(0, 0, 0, 0.1) 66%, transparent 66%),
+		-webkit-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
+		-webkit-linear-gradient(left, #FF0000, #9B0000);
+	
+	background-size: 1px 15px, 100% 95%, 100% 100%;
+
+}
+
 .inkbar::-moz-progress-bar {
 	border-radius: 3px;
 	padding: 2px;
@@ -135,4 +147,11 @@ td{
 		-moz-linear-gradient(45deg, transparent, transparent 66%, rgba(0, 0, 0, 0.1) 33%, rgba(0, 0, 0, 0.1) 66%, transparent 66%),
 		-moz-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
 		-moz-linear-gradient(left, #444444, #000000);
+}
+
+#emptybar::-moz-progress-bar {
+	background-image:
+		-moz-linear-gradient(45deg, transparent, transparent 66%, rgba(0, 0, 0, 0.1) 33%, rgba(0, 0, 0, 0.1) 66%, transparent 66%),
+		-moz-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
+		-moz-linear-gradient(left, #FF0000, #9B0000);
 }

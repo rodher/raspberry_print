@@ -98,7 +98,7 @@ td{
 
 }
 
-progress::-moz-progress-bar {
+.inkbar::-moz-progress-bar {
 	border-radius: 3px;
 	padding: 2px;
 	background-size: 1px 15px, 100% 95%, 100% 100%;

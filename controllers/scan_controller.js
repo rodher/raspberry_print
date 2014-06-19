@@ -156,7 +156,6 @@ communication = function communication (socket, scan, mode) {
     });
   	scan.on('close',function(code){
   		var evt = mode+"end";
-    	jobs[id].close=true; // Cuando se termina de ejecutar ponemos como verdadero el flag close
     	console.log("Trabajo terminado con codigo "+code);
         if(code===0) socket.emit( evt, { success: true});
         else{ 

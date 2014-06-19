@@ -58,14 +58,17 @@ exports.scan = function(req,res,next){
 	req.io.on('connection', function (socket){
         scan.stdout.on('data', function (chunk) {
           socket.emit('message', { msg: chunk.toString()});
+          console.log("stdout: "+chunk);
         });
         scan.stderr.on('data', function (chunk) {
         	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%$/);
         	if(progress) socket.emit('progress', { progress: progress[1] });
+        	console.log("stderr: "+chunk);
         });
       	scan.on('close',function(code){
       		var evt = req.body.scan_mode+"end";
         	jobs[id].close=true; // Cuando se termina de ejecutar ponemos como verdadero el flag close
+        	console.log("Trabajo terminado con codigo "+code);
             if(code===0) socket.emit( evt, { success: true});
             else{ 
               socket.emit( evt, { success: false});

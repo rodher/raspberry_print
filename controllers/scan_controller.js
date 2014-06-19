@@ -53,30 +53,10 @@ exports.scan = function(req,res,next){
   	// Ejecutamos el comando de escaneado
 	var scan = child.spawn('./bin/scan.sh', [req.body.scan_mode, fname.replace(/\s/g,"_")]);
 
-
 	// Conectamos con el socket
 	req.io.on('connection', function (socket){
-        scan.stdout.on('data', function (chunk) {
-          socket.emit('message', { msg: chunk.toString()});
-        });
-        scan.stderr.on('data', function (chunk) {
-        	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%/);
-        	if(progress) socket.emit('progress', { progress: progress[1] });
-        });
-      	scan.on('close',function(code){
-      		var evt = req.body.scan_mode+"end";
-        	jobs[id].close=true; // Cuando se termina de ejecutar ponemos como verdadero el flag close
-        	console.log("Trabajo terminado con codigo "+code);
-            if(code===0) socket.emit( evt, { success: true});
-            else{ 
-              socket.emit( evt, { success: false});
-              next(new Error("Error de impresión"));
-            }
-      	});
+		communication(socket, scan, req.body.scan_mode);
 
-      	socket.on('add', function (data){
-      		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
-      	});
 	});
 
 	// Enviamos la respuesta: "Archivo escaneandose"
@@ -163,4 +143,33 @@ exports.download = function(req, res, next){
 		  			}
 				}
 	);
+}
+
+communication = function communication (socket, scan, mode) {
+    scan.stdout.on('data', function (chunk) {
+
+      socket.emit('message', { msg: chunk.toString()});
+    });
+    scan.stderr.on('data', function (chunk) {
+    	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%/);
+    	if(progress) socket.emit('progress', { progress: progress[1] });
+    });
+  	scan.on('close',function(code){
+  		var evt = mode+"end";
+    	jobs[id].close=true; // Cuando se termina de ejecutar ponemos como verdadero el flag close
+    	console.log("Trabajo terminado con codigo "+code);
+        if(code===0) socket.emit( evt, { success: true});
+        else{ 
+          socket.emit( evt, { success: false});
+          next(new Error("Error de impresión"));
+        }
+  	});
+
+  	if(mode==="pdf"){
+	  	socket.on('add', function (data){
+	  		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
+	  		communication(this, scan, mode);
+	  	});
+  	}
+
 }

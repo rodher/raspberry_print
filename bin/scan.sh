@@ -38,7 +38,7 @@ fntAddPage()
 # Funcion para escanear
 fntScan()
 {	
-	echo "Escaneando imagen"
+	echo "Escaneando ${fname}"
 	scanimage -p --format=tiff --mode Color --resolution=300 > ${SCAN_DIR}/${fname}.tiff
 	echo "Convirtiendo a ${ext}"
 	convert ${SCAN_DIR}/${fname}.tiff  ${SCAN_DIR}/${fname}.${ext} &>> ${LOG_DIR}/scan.log

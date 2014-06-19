@@ -29,9 +29,19 @@ socket.on('message', function (data) {
 	$("#msg").html(data.msg);
 });
 
-// Callback cuando el comando finaliza
-socket.on('cmdend', function (data) {
+// Callback cuando la impresion finaliza
+socket.on('printend', function (data) {
 	console.log(data);
 	$("progress").hide();
-	$("#msg").html(data.msg);
+	if(data.success) $("#msg").html("Imprimiendo");
+	else $("#msg").html("Error al imprimir");
+});
+
+// Callback cuando el escaneado de la imagen finaliza
+socket.on('imgend', function (data) {
+	console.log(data);
+	$("progress").hide();
+	if(data.success) $("#msg").html("Descargando archivo");
+	else $("#msg").html("Error al escanear");
+	$( "#download" ).submit();
 });

@@ -35,38 +35,50 @@ exports.scan = function(req,res,next){
 			break;
 	}
 
+	var fname = req.body.filename;
 	// Comprobamos si existe un archivo de igual nombre
-  	if(fs.existsSync(s_dir+jobs[id].fname.replace(/\s/g,"_")+ext)){
+  	if(fs.existsSync(s_dir+fname.replace(/\s/g,"_")+ext)){
 
   		var i=0
   		var name;
   		// Compruebo cuantos archivos de igual nombre existen y le pongo "nombre(n).ext"
   		do{
   			i++;
-  			name=jobs[id].fname+"("+i+")";
+  			name=fname+"("+i+")";
   		}while(fs.existsSync(s_dir+name.replace(/\s/g,"_")+ext))
   		jobs[id].fname=name;
+  		fname = name;
   	}
 
   	// Ejecutamos el comando de escaneado
-	child.execFile('./bin/scan.sh', [req.body.scan_mode, jobs[id].fname.replace(/\s/g,"_")] ,
-		function (error, stdout, stderr) {
-	      if(error!==null){
-	        next(error);
-	      }
-	      console.log('scan stdout:');
-	      console.log(stdout);
-	      if(stderr){
-	        console.log('scan stderr:');
-	        console.log(stderr);
-	      }
-		})
-		.on('close',function(code,signal){
+	var scan = child.spawn('./bin/scan.sh', [req.body.scan_mode, fname.replace(/\s/g,"_")]);
+
+
+	// Conectamos con el socket
+	req.io.on('connection', function (socket){
+        scan.stdout.on('data', function (chunk) {
+          socket.emit('message', { msg: chunk.toString()});
+        });
+        scan.stderr.on('data', function (chunk)){
+        	var progress = chunk.match(/^Progress: ([0-9]+)\.[0-9]%$/);
+        	if(progress) socket.emit('progress', { progress: progress[1] });
+        });
+      	scan.on('close',function(code){
+      		var evt = req.body.scan_mode+"end";
         	jobs[id].close=true; // Cuando se termina de ejecutar ponemos como verdadero el flag close
+            if(code===0) socket.emit( evt, { success: true});
+            else{ 
+              socket.emit( evt, { success: false});
+              next(new Error("Error de impresión"));
+            }
       	});
+	});
 
 	// Enviamos la respuesta: "Archivo escaneandose"
-	res.render("scan/sent", {sc_mode: req.body.scan_mode, scanid: id});
+	//res.render("scan/sent", {sc_mode: req.body.scan_mode, scanid: id});
+	res.render("scan/"+req.body.scan_mode, { fname: fname});
+
+
 
 }
 
@@ -137,31 +149,14 @@ exports.resultPDF = function(req, res, next){
 exports.download = function(req, res, next){
 
 	// Enviamos el archivo escaneado con su extension correspondiente
-	switch (jobs[req.query.scanid].mode){
-		case "img" :
-			res.download(s_dir+jobs[req.query.scanid].fname.replace(/\s/g,"_")+'.jpg', 
-									jobs[req.query.scanid].fname+'.jpg', function(err){
-				  				if (err) {
-						    		next(err);
-					  			} else {
-					    			console.log("Operación realizada con éxito");
-					  			}
-							});
-			break;
-		case "pdf" :
-			res.download(s_dir+jobs[req.query.scanid].fname.replace(/\s/g,"_")+'.pdf', 
-									jobs[req.query.scanid].fname+'.pdf', function(err){
-				  				if (err) {
-						    		next(err);
-					  			} else {
-					    			console.log("Operación realizada con éxito");
-					  			}
-							});
-			break;
-		default:
-			break;
-	}
-
-	// Borramos el trabajo de la lista de trabajos
-	delete jobs[req.query.scanid];
+	res.download(s_dir+req.query.fname.replace(/\s/g,"_")+'.'+req.query.ext, 
+				req.query.fname+'.'+req.query.ext, 
+				function(err){
+	  				if (err) {
+			    		next(err);
+		  			} else {
+		    			console.log("Operación realizada con éxito");
+		  			}
+				}
+	);
 }

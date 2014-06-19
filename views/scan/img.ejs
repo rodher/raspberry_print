@@ -1,0 +1,13 @@
+<h2>Escanear</h2>
+
+<div id="msg"><%= msg %></div>
+<br>
+<progress value="0" max="100"></progress>
+<br>
+<a href="/"> Inicio</a>
+
+<form id='download' method='get' action='/scan/download'>
+	<input type="hidden" name="fname" value="<%= fname %>">
+	<input type="hidden" name="ext" value="jpg">
+</form>
+<a href="/"> Inicio</a>

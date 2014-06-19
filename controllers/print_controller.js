@@ -60,16 +60,17 @@ exports.print = function(req, res, next) {
       // Conectamos con el socket
       req.io.on('connection', function (socket){
         // Enviamos información a través del socket
-        print.stdout.on('data', function (data) {
-          var progress = String(data).match(/[0-9]+/);
+        print.stdout.on('data', function (chunk) {
+          var data = chunk.toString();
+          var progress = data.match(/[0-9]+/);
           if(progress) socket.emit('progress', { progress: progress[0] });
-          else socket.emit('message', { msg: String(data)});
+          else socket.emit('message', { msg: data});
         });
 
         print.on('close',function (code){
-            if(code===0) socket.emit('cmdend', { msg: "Imprimiendo"});
+            if(code===0) socket.emit('printend', { success: true});
             else{ 
-              socket.emit('cmdend', { msg: "Error al imprimir"});
+              socket.emit('printend', { success: false});
               next(new Error("Error de impresión"));
             }
         });
@@ -123,11 +124,3 @@ validate =function(printjob){
   
   return true;
 };
-
-
-
-
-
-
-
-

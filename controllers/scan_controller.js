@@ -59,8 +59,8 @@ exports.scan = function(req,res,next){
         scan.stdout.on('data', function (chunk) {
           socket.emit('message', { msg: chunk.toString()});
         });
-        scan.stderr.on('data', function (chunk)){
-        	var progress = chunk.match(/^Progress: ([0-9]+)\.[0-9]%$/);
+        scan.stderr.on('data', function (chunk) {
+        	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%$/);
         	if(progress) socket.emit('progress', { progress: progress[1] });
         });
       	scan.on('close',function(code){

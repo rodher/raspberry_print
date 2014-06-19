@@ -71,7 +71,7 @@ socket.on('pdfend', function (data) {
 });
 
 function add(){
-	socket.emit("add", {fname: $("fname").val()});
+	socket.emit("add", {fname: $("#fname").val()});
 	$(".botones").hide();
 	$("progress").show();
 }

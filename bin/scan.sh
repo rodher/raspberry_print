@@ -39,7 +39,7 @@ fntAddPage()
 fntScan()
 {	
 	echo "Escaneando ${fname}"
-	scanimage -p --mode Color --resolution=300 > ${SCAN_DIR}/${fname}.pnm
+	scanimage -p -x 210 -y 297 --mode Color --resolution=300 > ${SCAN_DIR}/${fname}.pnm
 }
 
 # Funcion para convertir a jpg

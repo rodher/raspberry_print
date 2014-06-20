@@ -3,7 +3,6 @@ var fs = require('fs');					// Modulo de archivos de sistema
 
 var s_dir = "scans/"; // Directorio donde se almacenan los escaneos
 
-var jobs={}; // Trabajos pendientes: {close, fname, mode, pages, ival}
 
 // GET /scan/index
 exports.index = function(req, res, next) {
@@ -14,15 +13,9 @@ exports.index = function(req, res, next) {
 
 // POST /scan
 exports.scan = function(req,res,next){
-	
-	var id=Date.now(); // Creamos id para el trabajo
-
-	// Añadimos trabajo a la lista de trabajos pendientes
-    jobs[id]={close: false, fname: req.body.filename || String(id) , mode: req.body.scan_mode, pages: 1};
-    var ext;
 
     // Determinamos la extension del archivo resultante
-	switch (jobs[id].mode){
+	switch (req.body.scan_mode){
 		case "img" :
 			ext=".jpg"
 			break;
@@ -35,7 +28,7 @@ exports.scan = function(req,res,next){
 			break;
 	}
 
-	var fname = req.body.filename;
+	var fname = req.body.filename || String(Date.now());
 	// Comprobamos si existe un archivo de igual nombre
   	if(fs.existsSync(s_dir+fname.replace(/\s/g,"_")+ext)){
 
@@ -46,7 +39,6 @@ exports.scan = function(req,res,next){
   			i++;
   			name=fname+"("+i+")";
   		}while(fs.existsSync(s_dir+name.replace(/\s/g,"_")+ext))
-  		jobs[id].fname=name;
   		fname = name;
   	}
 
@@ -56,11 +48,11 @@ exports.scan = function(req,res,next){
 	// Conectamos con el socket
 	req.io.on('connection', function (socket){
 		communication(socket, scan, req.body.scan_mode);
-
+		// Enviamos la respuesta: "Archivo escaneandose"
+		res.render("scan/"+req.body.scan_mode, { fname: fname, jobid: socket.id});
 	});
 
-	// Enviamos la respuesta: "Archivo escaneandose"
-	res.render("scan/"+req.body.scan_mode, { fname: fname});
+
 
 
 
@@ -148,18 +140,18 @@ exports.download = function(req, res, next){
 communication = function communication (socket, scan, mode) {
     scan.stdout.on('data', function (chunk) {
 
-      socket.emit('message', { msg: chunk.toString()});
+      socket.emit('message', { msg: chunk.toString(), jobid: socket.id});
     });
     scan.stderr.on('data', function (chunk) {
     	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%/);
-    	if(progress) socket.emit('progress', { progress: progress[1] });
+    	if(progress) socket.emit('progress', { progress: progress[1], jobid: socket.id });
     });
   	scan.on('close',function(code){
   		var evt = mode+"end";
     	console.log("Trabajo terminado con codigo "+code);
-        if(code===0) socket.emit( evt, { success: true});
+        if(code===0) socket.emit( evt, { success: true, jobid: socket.id});
         else{ 
-          socket.emit( evt, { success: false});
+          socket.emit( evt, { success: false, jobid: socket.id});
           next(new Error("Error de impresión"));
         }
   	});

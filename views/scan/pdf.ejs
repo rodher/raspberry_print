@@ -2,6 +2,7 @@
 
 <div id="msg"></div>
 <progress value="0" max="100"></progress>
+<input type="hidden" id="job" value="<%= jobid %>">
 <br>
 <form method='get' action='/scan/download' onsubmit='download()'>
 	<input id="fname" type="hidden" name="fname" value="<%= fname %>">

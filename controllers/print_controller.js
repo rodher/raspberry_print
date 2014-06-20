@@ -63,24 +63,27 @@ exports.print = function(req, res, next) {
         print.stdout.on('data', function (chunk) {
           var data = chunk.toString();
           var progress = data.match(/[0-9]+/);
-          if(progress) socket.emit('progress', { progress: progress[0] });
-          else socket.emit('message', { msg: data});
+          if(progress) socket.emit('progress', { progress: progress[0], jobid: socket.id });
+          else socket.emit('message', { msg: data, jobid: socket.id});
         });
 
         print.on('close',function (code){
-            if(code===0) socket.emit('printend', { success: true});
+            if(code===0) socket.emit('printend', { success: true, jobid: socket.id});
             else{ 
-              socket.emit('printend', { success: false});
+              socket.emit('printend', { success: false, jobid: socket.id});
               next(new Error("Error de impresión"));
             }
         });
+
+        // Enviamos respuesta, el archivo esta preparandose para imprimir
+        res.render("print/sent", {
+          msg: fname+" enviado con éxito. Preparando archivo para imprimir.",
+          jobid: socket.id  
+        });   
       });
 
 
-      // Enviamos respuesta, el archivo esta preparandose para imprimir
-      res.render("print/sent", {
-        msg: fname+" enviado con éxito. Preparando archivo para imprimir.",  
-      });     
+  
     } else{
       next(new Error('Formulario mal rellenado'));
     }

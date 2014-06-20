@@ -6,7 +6,7 @@ var id;
 	y si es menor del 10% cambiamos el color
 */
 $(document).ready(function() {
-	id = $("#job").val();
+	id = parseInt($("#job").val());
 	$(".inkbar").each(function(){
 		if($(this).val()<=10) $(this).attr('id', 'emptybar');
 	});

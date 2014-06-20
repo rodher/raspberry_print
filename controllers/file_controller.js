@@ -2,12 +2,6 @@ var fs = require('fs'); // Modulo de archivos de sistema
 
 // GET /files
 exports.index = function(req, res, next){
-	req.io.on('connection', function (socket) {
-	  socket.emit('news', { hello: 'world', page: 'files' });
-	  socket.on('my other event', function (data) {
-	    console.log(data);
-	  });
-	});
 	res.render('files');
 };
 

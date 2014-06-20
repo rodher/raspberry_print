@@ -28,7 +28,8 @@ exports.scan = function(req,res,next){
 			break;
 	}
 
-	var fname = req.body.filename || String(Date.now());
+	var fname = req.body.filename || String(Date.now()); // Obtenemos el nombre
+
 	// Comprobamos si existe un archivo de igual nombre
   	if(fs.existsSync(s_dir+fname.replace(/\s/g,"_")+ext)){
 
@@ -50,76 +51,8 @@ exports.scan = function(req,res,next){
 		communication(socket, scan, req.body.scan_mode, scan.pid);
 	});
 
-	// Enviamos la respuesta: "Archivo escaneandose"
+	// Enviamos la respuesta y marcamos la conversacion con el pid
 	res.render("scan/"+req.body.scan_mode, { fname: fname, jobid: scan.pid});
-
-
-
-
-
-}
-
-// GET /scan/result
-exports.result = function(req, res, next){
-
-	// Creamos la funcion de comprobacion de trabajo finalizado
-	var funcion = function(){
-	    if(jobs[req.query.scanid].close){
-
-	    	clearInterval( jobs[req.query.scanid].ival); // Terminamos la comprobacion periodica
-
-	    	// Enviamos respuestas distintas dependiendo del modo de escaneado
-			switch (jobs[req.query.scanid].mode){
-				case "img" :
-					res.render("scan/result", {	fname:jobs[req.query.scanid].fname+'.jpg',
-												scanid: req.query.scanid});
-					break;
-
-				case "pdf" :
-					res.render("scan/pdf", {scanid: req.query.scanid, 
-											pages: jobs[req.query.scanid].pages });
-					break;
-
-				default :
-					break;
-			}
-	    }
-	};
-
-	jobs[req.query.scanid].ival=setInterval(funcion,0); // Comprobamos periodicamente
-}
-
-// POST /scan/add
-exports.add = function(req, res, next){
-
-	jobs[req.body.scanid].close=false; 	// Volvemos a poner como falso el flag close
-	jobs[req.body.scanid].pages++;		// y aumentamos el numero de paginas
-
-	// Ejecuamos nuevamente el comando de escaneo
-	child.execFile('./bin/scan.sh', [jobs[req.body.scanid].fname.replace(/\s/g,"_")] ,
-	function (error, stdout, stderr) {
-      if(error!==null){
-        next(error);
-      }
-      console.log('scan stdout:');
-      console.log(stdout);
-      if(stderr){
-        console.log('scan stderr:');
-        console.log(stderr);
-      }
-	})
-	.on('close',function(code,signal){
-    	jobs[req.body.scanid].close=true; // Cuando se termina de ejecutar ponemos como verdadero el flag close
-  	});
-
-	// Enviamos respuesta: "Archivo escaneandose"
-	res.render("scan/sent", {sc_mode: jobs[req.body.scanid].mode, scanid: req.body.scanid});
-}
-
-// GET /scan/pdf/result
-exports.resultPDF = function(req, res, next){
-	res.render("scan/result", {	fname:jobs[req.query.scanid].fname+'.pdf',
-												scanid: req.query.scanid});
 }
 
 // GET /scan/download
@@ -138,18 +71,27 @@ exports.download = function(req, res, next){
 	);
 }
 
+/* Funcion que implementa la comunicacion por sockets.
+	usa como parametros el socket creado, el child process, el modo de
+	escaneado y el pid del proceso para identificar el socket
+*/
 communication = function communication (socket, scan, mode, pid) {
+	// Enviamos la salida de datos como mensajes en el cliente
     scan.stdout.on('data', function (chunk) {
-
-      socket.emit('message', { msg: chunk.toString(), jobid: pid});
+    	console.log(chunk);
+      	socket.emit('message', { msg: chunk.toString(), jobid: pid});
     });
+    // Enviamos la salida de error, donde se imprime el progreso, como muestra del progreso
     scan.stderr.on('data', function (chunk) {
-    	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%/);
+    	console.log(chunk);
+    	//Comprobamos que la salida es numerica
+    	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%/); 
     	if(progress) socket.emit('progress', { progress: progress[1], jobid: pid });
     });
+    // Al cerrar avisamos de que el proceso ha terminado, con exito o no
   	scan.on('close',function(code){
-  		var evt = mode+"end";
-    	console.log("Trabajo terminado con codigo "+code);
+  		var evt = mode+"end"; // Determinamos evento del socket en funcion del formato de escaneo
+    	console.log("Escaneo terminado con codigo "+code);
         if(code===0) socket.emit( evt, { success: true, jobid: pid});
         else{ 
           socket.emit( evt, { success: false, jobid: pid});
@@ -157,11 +99,11 @@ communication = function communication (socket, scan, mode, pid) {
         }
   	});
 
+  	// Si el formato es pdf nos preparamos para añadir nuevas hojs
   	if(mode==="pdf"){
 	  	socket.on('add', function (data){
 	  		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
-	  		communication(this, scan, mode, pid);
+	  		communication(this, scan, mode, pid); // Llamada recursiva a communication
 	  	});
   	}
-
 }

@@ -20,10 +20,7 @@ router.get('/ink',  printController.inklevels);
 
 //Rutas de escaneado
 router.get('/scan/index',  scanController.index);
-router.post('/scan',  scanController.scan);
-router.get('/scan/result', scanController.result);
-router.post('/scan/add', scanController.add); 
-router.get('/scan/pdf/result', scanController.resultPDF); 
+router.post('/scan',  scanController.scan); 
 router.get('/scan/download',  scanController.download);
 
 // Rutas de muestra de archivos
@@ -35,12 +32,6 @@ router.get('/files', fileController.index);
 
 // Ruta de ayuda
 router.get('/help', function(req, res, next){
-	req.io.on('connection', function (socket) {
-	  socket.emit('news', { hello: 'world', page: 'help' });
-	  socket.on('my other event', function (data) {
-	    console.log(data);
-	  });
-	});
 	res.render('help');
 });
 

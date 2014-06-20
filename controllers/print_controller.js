@@ -61,12 +61,14 @@ exports.print = function(req, res, next) {
       req.io.on('connection', function (socket){
         // Enviamos información a través del socket
         print.stdout.on('data', function (chunk) {
-          var data = chunk.toString();
-          var progress = data.match(/[0-9]+/);
+          var data = chunk.toString(); // Convertimos de Buffer a String
+          var progress = data.match(/[0-9]+/); // Comprobamos que se trata de progreso o no
           if(progress) socket.emit('progress', { progress: progress[0], jobid: print.pid });
           else socket.emit('message', { msg: data, jobid: print.pid});
+          console.log(data);
         });
 
+        // Avisamos del fin del proceso
         print.on('close',function (code){
             if(code===0) socket.emit('printend', { success: true, jobid: print.pid});
             else{ 
@@ -76,14 +78,11 @@ exports.print = function(req, res, next) {
         });
       });
 
-      // Enviamos respuesta, el archivo esta preparandose para imprimir
+      // Enviamos respuesta, y marcamos la conversacion con el pid
       res.render("print/sent", {
         msg: fname+" enviado con éxito. Preparando archivo para imprimir.",
         jobid: print.pid  
       });   
-
-
-  
     } else{
       next(new Error('Formulario mal rellenado'));
     }

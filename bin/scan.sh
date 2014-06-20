@@ -39,12 +39,28 @@ fntAddPage()
 fntScan()
 {	
 	echo "Escaneando ${fname}"
-	scanimage -p --format=tiff --mode Color --resolution=300 > ${SCAN_DIR}/${fname}.tiff
-	echo "Convirtiendo a ${ext}"
-	convert ${SCAN_DIR}/${fname}.tiff  ${SCAN_DIR}/${fname}.${ext} &>> ${LOG_DIR}/scan.log
-	fntCheckErrors ${LOG_DIR}/scan.log
-	rm ${SCAN_DIR}/${fname}.tiff
+	scanimage -p --mode Color --resolution=300 > ${SCAN_DIR}/${fname}.pnm
+}
 
+# Funcion para convertir a jpg
+fntJPG()
+{	
+	echo "Convirtiendo a jpg"
+	convert -quality 75 ${SCAN_DIR}/${fname}.pnm  ${SCAN_DIR}/${fname}.jpg &> ${LOG_DIR}/convertJPG.log
+	fntCheckErrors ${LOG_DIR}/convertJPG.log
+	rm ${SCAN_DIR}/${fname}.pnm
+}
+
+# Funcion para convertir a pdf
+fntPDF(){
+	echo "Convirtiendo a imagen"
+	convert -quality 75 ${SCAN_DIR}/${fname}.pnm  ${SCAN_DIR}/${fname}_tmp.jpg &> ${LOG_DIR}/convertJPG.log
+	fntCheckErrors ${LOG_DIR}/convertJPG.log
+	rm ${SCAN_DIR}/${fname}.pnm
+	echo "Convirtiendo a pdf"
+	convert ${SCAN_DIR}/${fname}_tmp.jpg ${SCAN_DIR}/${fname}.pdf &> ${LOG_DIR}/convertPDF.log
+	fntCheckErrors ${LOG_DIR}/convertPDF.log
+	rm ${SCAN_DIR}/${fname}_tmp.jpg
 }
 
 #########################
@@ -57,27 +73,25 @@ find ${SCAN_DIR}/ -mtime +${MAX_DAYS} -delete # Borrado de archivos que llevan m
 if [[ $# == 1 ]]; then
 	doc=$1
 	fname=$1_parcial
-	ext="pdf"
 	fntScan
+	fntPDF
 	fntAddPage
 
 # Comportamiento si se usan dos parametros: Modo escanear
 elif [[ $# == 2 ]]; then
 
 	fname=$2
+	fntScan
 
 	if [[ "$1" == "pdf" ]]; then
-		ext="pdf"
-
+		fntPDF
 	elif [[ "$1" == "img" ]]; then
-		ext="jpg"
+		fntJPG
 	else
 		echo "Formato de archivo no admitido" >&2 
 		exit 1
 	fi
-
-	fntScan
-
+	
 else
 	echo "Número de argumentos incorrecto" >&2
 	exit 1

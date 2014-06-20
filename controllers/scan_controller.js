@@ -78,12 +78,12 @@ exports.download = function(req, res, next){
 communication = function communication (socket, scan, mode, pid) {
 	// Enviamos la salida de datos como mensajes en el cliente
     scan.stdout.on('data', function (chunk) {
-    	console.log(chunk);
+    	console.log(chunk.toString());
       	socket.emit('message', { msg: chunk.toString(), jobid: pid});
     });
     // Enviamos la salida de error, donde se imprime el progreso, como muestra del progreso
     scan.stderr.on('data', function (chunk) {
-    	console.log(chunk);
+    	console.log(chunk.toString());
     	//Comprobamos que la salida es numerica
     	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%/); 
     	if(progress) socket.emit('progress', { progress: progress[1], jobid: pid });

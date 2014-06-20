@@ -47,10 +47,11 @@ exports.scan = function(req,res,next){
 
 	// Conectamos con el socket
 	req.io.on('connection', function (socket){
-		communication(socket, scan, req.body.scan_mode);
-		// Enviamos la respuesta: "Archivo escaneandose"
-		res.render("scan/"+req.body.scan_mode, { fname: fname, jobid: socket.id});
+		communication(socket, scan, req.body.scan_mode, scan.pid);
 	});
+
+	// Enviamos la respuesta: "Archivo escaneandose"
+	res.render("scan/"+req.body.scan_mode, { fname: fname, jobid: scan.pid});
 
 
 
@@ -137,21 +138,21 @@ exports.download = function(req, res, next){
 	);
 }
 
-communication = function communication (socket, scan, mode) {
+communication = function communication (socket, scan, mode, pid) {
     scan.stdout.on('data', function (chunk) {
 
-      socket.emit('message', { msg: chunk.toString(), jobid: socket.id});
+      socket.emit('message', { msg: chunk.toString(), jobid: pid});
     });
     scan.stderr.on('data', function (chunk) {
     	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%/);
-    	if(progress) socket.emit('progress', { progress: progress[1], jobid: socket.id });
+    	if(progress) socket.emit('progress', { progress: progress[1], jobid: pid });
     });
   	scan.on('close',function(code){
   		var evt = mode+"end";
     	console.log("Trabajo terminado con codigo "+code);
-        if(code===0) socket.emit( evt, { success: true, jobid: socket.id});
+        if(code===0) socket.emit( evt, { success: true, jobid: pid});
         else{ 
-          socket.emit( evt, { success: false, jobid: socket.id});
+          socket.emit( evt, { success: false, jobid: pid});
           next(new Error("Error de impresión"));
         }
   	});
@@ -159,7 +160,7 @@ communication = function communication (socket, scan, mode) {
   	if(mode==="pdf"){
 	  	socket.on('add', function (data){
 	  		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
-	  		communication(this, scan, mode);
+	  		communication(this, scan, mode, pid);
 	  	});
   	}
 

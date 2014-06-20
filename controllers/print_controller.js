@@ -63,24 +63,24 @@ exports.print = function(req, res, next) {
         print.stdout.on('data', function (chunk) {
           var data = chunk.toString();
           var progress = data.match(/[0-9]+/);
-          if(progress) socket.emit('progress', { progress: progress[0], jobid: socket.id });
-          else socket.emit('message', { msg: data, jobid: socket.id});
+          if(progress) socket.emit('progress', { progress: progress[0], jobid: print.pid });
+          else socket.emit('message', { msg: data, jobid: print.pid});
         });
 
         print.on('close',function (code){
-            if(code===0) socket.emit('printend', { success: true, jobid: socket.id});
+            if(code===0) socket.emit('printend', { success: true, jobid: print.pid});
             else{ 
-              socket.emit('printend', { success: false, jobid: socket.id});
+              socket.emit('printend', { success: false, jobid: print.pid});
               next(new Error("Error de impresión"));
             }
         });
-
-        // Enviamos respuesta, el archivo esta preparandose para imprimir
-        res.render("print/sent", {
-          msg: fname+" enviado con éxito. Preparando archivo para imprimir.",
-          jobid: socket.id  
-        });   
       });
+
+      // Enviamos respuesta, el archivo esta preparandose para imprimir
+      res.render("print/sent", {
+        msg: fname+" enviado con éxito. Preparando archivo para imprimir.",
+        jobid: print.pid  
+      });   
 
 
   

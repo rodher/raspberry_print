@@ -96,9 +96,9 @@ exports.inklevels = function(req,res, next){
   child.exec('ink -p usb', function (error, stdout, stderr) {
     console.log('ink stdout: ' + stdout);
     console.log('ink stderr: ' + stderr);
-    if (error !== null) {
-      next(error);
-    }
+    if (error !== null) next(error);
+    if(stdout.match(/Could\snot/)) next(new Error("No se pueden obtener niveles de tinta"));
+    
     var inklevels ={};
 
     // Rellenamos la informacion de nivel de los distintos colores

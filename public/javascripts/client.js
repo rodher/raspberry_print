@@ -7,6 +7,7 @@ var id;
 	2. 	Comprobamos el nivel de tinta de cada color
 		y si es menor que el 10% cambiamos el color
 	3.	Ocultamos los botones de escaneado de pdf
+	4. Ocultamos la entrada de la lista de páginas a imprimir
 */
 $(document).ready(function() {
 	id = parseInt($("#job").val()); 
@@ -14,6 +15,7 @@ $(document).ready(function() {
 		if($(this).val()<=10) $(this).attr('id', 'emptybar');
 	});
 	$(".botones").hide();
+	$("#interval").hide();
 });
 
 // Funcion onclick de "Añadir otra pagina"
@@ -27,6 +29,11 @@ function add(){
 function download() {
 	$(".botones").hide();					// Ocultamos botones de accion
 	$("#msg").html("Descargando archivo");	// Cambiamos el mensaje
+}
+
+function checkInterval() {
+	if($("#pagemode").val()==="interval") $("#interval").show();
+	else $("#interval").hide();
 }
 
 var socket = io.connect('http://192.168.1.200:3000'); // Conectamos con el servidor

@@ -3,10 +3,13 @@
 <form method='post' action='/scan'>
 
   <div class='field'>
-    Nombre del archivo: <input type="text" name="filename" placeholder="Sin el .jpg o el .pdf"><br>
+    <label for="fname">Nombre del archivo:</label>
+    <input type="text" name="filename" id="fname" placeholder="Sin el .jpg o el .pdf"><br>
     Formato: <br>
-    <input type="radio" name="scan_mode" value="img" checked="checked">Imagen<br>
-	<input type="radio" name="scan_mode" value="pdf">PDF
+    <input id="img" type="radio" name="scan_mode" value="img" checked="checked">
+    <label for="img">Imagen</label><br>
+	<input id="pdf" type="radio" name="scan_mode" value="pdf">
+	<label for="pdf">PDF</label>
   </div>
 
   <div class="actions">

@@ -31,9 +31,10 @@ function download() {
 	$("#msg").html("Descargando archivo");	// Cambiamos el mensaje
 }
 
+// Funcion onchange del formulario de modo de paginas de impresion
 function checkInterval() {
-	if($("#pagemode").val()==="interval") $("#interval").show();
-	else $("#interval").hide();
+	if($("#pagemode").val()==="interval") $("#interval").show();	// Si se ha elegido interval se muestra la entrada de texto
+	else $("#interval").hide();										// En cualquier otro caso se oculta
 }
 
 var socket = io.connect('http://192.168.1.200:3000'); // Conectamos con el servidor

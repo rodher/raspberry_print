@@ -49,7 +49,7 @@ function checkInterval() {
 
 // Funcion que cancela seleccion del area de la imagen en scan/pre
 function cancelSelection(){
-	$("#prueba").imgAreaSelect({instance: true})	// Cancelamos la seleccion
+	$("#imagen").imgAreaSelect({instance: true})	// Cancelamos la seleccion
 				.cancelSelection();
 	$('input[name="left"]').val(0);					// Restauramos valores por defecto
 	$('input[name="top"]').val(0);
@@ -58,9 +58,9 @@ function cancelSelection(){
 
 }
 
-// Funcion que pasa de pixeles a centimetros, dividiendo por la escala de 6 y redondeando a un decimal
+// Funcion que pasa de pixeles a centimetros, dividiendo por la escala de 2 y redondeando a un decimal
 function toCms(pixels){
-	return (pixels/6).toFixed(1);
+	return (pixels/2).toFixed(1);
 }
 
 var socket = io.connect('http://192.168.1.200:3000'); // Conectamos con el servidor

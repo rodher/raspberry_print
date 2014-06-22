@@ -122,6 +122,7 @@ socket.on('pdfend', function (data) {
 	}
 });
 
+// Callback cuando el escaneado de la vista previa finaliza
 socket.on('preend', function (data) {
 	if(data.jobid===id){
 		$("progress").hide();	// Ocultamos la barra de progreso
@@ -130,8 +131,8 @@ socket.on('preend', function (data) {
 			$("#imagen").attr('src', '/images/'+$("#fname").val()+'_pre.jpg');
 			$("#imagen").imgAreaSelect({
 				onSelectEnd: function (img, selection) {
-					if(!selection.width || !selection.height) cancelSelection();
-					else{
+					if(!selection.width || !selection.height) cancelSelection(); 	// Si no se ha seleccionado nada
+					else{															// cancelamos la seleccion
 	            		$('input[name="left"]').val(toCms(selection.x1));
 	            		$('input[name="top"]').val(toCms(selection.y1));
 	            		$('input[name="width"]').val(toCms(selection.width));

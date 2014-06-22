@@ -1,0 +1,20 @@
+<h2>Escanear</h2>
+
+<div id="msg"></div>
+<progress value="0" max="100"></progress>
+<input type="hidden" id="job" value="<%= jobid %>">
+<br>
+<div id="crop">
+	<input type="button" value="Cancelar selección" onclick="cancelSelection()">
+	<form method='post' action='/scan/crop'>
+		<input id="fname" type="hidden" name="fname" value="<%= fname %>">
+		<input type="hidden" name="left" value="0" />
+		<input type="hidden" name="top" value="0" />
+		<input type="hidden" name="width" value="208.5"/>
+		<input type="hidden" name="height" value="295.5"/>
+		<input type="submit" value="Escanear" name="commit" />
+	</form>	
+</div>
+
+<br>
+<a href="/"> Inicio</a>

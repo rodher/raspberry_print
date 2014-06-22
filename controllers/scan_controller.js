@@ -14,6 +14,8 @@ exports.index = function(req, res, next) {
 // POST /scan
 exports.scan = function(req,res,next){
 
+	var ext;
+
     // Determinamos la extension del archivo resultante
 	switch (req.body.scan_mode){
 		case "img" :
@@ -43,16 +45,21 @@ exports.scan = function(req,res,next){
   		fname = name;
   	}
 
+  	var mode;
+
+  	if(req.body.preview) mode="pre";
+  	else mode=req.body.scan_mode;
+
   	// Ejecutamos el comando de escaneado
-	var scan = child.spawn('./bin/scan.sh', [req.body.scan_mode, fname.replace(/\s/g,"_")]);
+	var scan = child.spawn('./bin/scan.sh', [mode, fname.replace(/\s/g,"_")]);
 
 	// Conectamos con el socket
 	req.io.on('connection', function (socket){
-		communication(socket, scan, req.body.scan_mode, scan.pid);
+		communication(socket, scan, mode, scan.pid);
 	});
 
 	// Enviamos la respuesta y marcamos la conversacion con el pid
-	res.render("scan/"+req.body.scan_mode, { fname: fname, jobid: scan.pid});
+	res.render("scan/"+mode, { fname: fname, jobid: scan.pid});
 }
 
 // GET /scan/download
@@ -99,11 +106,19 @@ communication = function communication (socket, scan, mode, pid) {
         }
   	});
 
-  	// Si el formato es pdf nos preparamos para añadir nuevas hojs
+  	// Si el formato es pdf nos preparamos para añadir nuevas hojas
   	if(mode==="pdf"){
 	  	socket.on('add', function (data){
 	  		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
 	  		communication(this, scan, mode, pid); // Llamada recursiva a communication
 	  	});
+  	} // Si el formato es pre nos preparamos para escanear hoja recortada
+  	else if(mode==="pre"){
+	  	socket.on('crop', function (data){
+	  		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
+	  		communication(this, scan, mode, pid); // Llamada recursiva a communication
+	  	});
   	}
+
+
 }

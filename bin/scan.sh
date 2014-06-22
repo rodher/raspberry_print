@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Ejemplo de uso: scan.sh scanmode fname || scan.sh fname
+# Ejemplo de uso: scan.sh fname || scan.sh scanmode fname || scan.sh left top width height fname
 
 #########################
 #		CONSTANTES		#
@@ -39,7 +39,7 @@ fntAddPage()
 fntScan()
 {	
 	echo "Escaneando ${fname}"
-	scanimage -p -x 208.5 -y 295.5 --mode Color --resolution=300 > ${SCAN_DIR}/${fname}.pnm
+	scanimage -p -l ${left} -t ${top} -x ${width} -y ${height} --mode Color ${res} > ${SCAN_DIR}/${fname}.pnm
 }
 
 # Funcion para convertir a jpg
@@ -72,7 +72,13 @@ find ${SCAN_DIR}/ -mtime +${MAX_DAYS} -delete # Borrado de archivos que llevan m
 # Comportamiento si solo se usa un parametro: Modo escanear y añadir pagina
 if [[ $# == 1 ]]; then
 	doc=$1
+	left=0
+	top=0
+	width="208.5"
+	height="295.5"
+	res="--resolution=300"
 	fname=$1_parcial
+
 	fntScan
 	fntPDF
 	fntAddPage
@@ -80,18 +86,43 @@ if [[ $# == 1 ]]; then
 # Comportamiento si se usan dos parametros: Modo escanear
 elif [[ $# == 2 ]]; then
 
-	fname=$2
+	left=0
+	top=0
+	width="208.5"
+	height="295.5"
+
+	if [[ "$1" == "pre" ]]; then
+		res="--preview=yes"
+		fname=$2_pre
+	else
+		res="--resolution=300"
+		fname=$2
+	fi 
+
 	fntScan
 
 	if [[ "$1" == "pdf" ]]; then
 		fntPDF
-	elif [[ "$1" == "img" ]]; then
+	elif [[ "$1" == "img" || "$1" == "pre" ]]; then
 		fntJPG
 	else
-		echo "Formato de archivo no admitido" >&2 
+		echo "Modo de escaneo no admitido" >&2 
 		exit 1
 	fi
+
+# Comportamiento si se usan cinco parametros: Modo recortar
+elif [[ $# == 5 ]]; then
 	
+	left=$1
+	top=$2
+	width=$3
+	height=$4
+	res="--resolution=300"
+	fname=$5
+
+	fntScan
+	fntJPG
+
 else
 	echo "Número de argumentos incorrecto" >&2
 	exit 1

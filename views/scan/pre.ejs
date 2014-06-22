@@ -8,11 +8,11 @@
 	<img id="imagen" src="" width="1251" height="1773" alt="Vista previa">
 	<input type="button" value="Cancelar selección" onclick="cancelSelection()"><br>
 	<form method='post' action='/scan/crop'>
-		<input id="fname" type="hidden" name="fname" value="<%= fname %>">
 		<input type="hidden" name="left" value="0" />
 		<input type="hidden" name="top" value="0" />
 		<input type="hidden" name="width" value="208.5"/>
 		<input type="hidden" name="height" value="295.5"/>
+		<input id="fname" type="hidden" name="fname" value="<%= fname %>">
 		<input type="submit" value="Escanear" name="commit" />
 	</form>	
 </div>

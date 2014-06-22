@@ -20,7 +20,8 @@ router.get('/ink',  printController.inklevels);
 
 //Rutas de escaneado
 router.get('/scan/index',  scanController.index);
-router.post('/scan',  scanController.scan); 
+router.post('/scan',  scanController.scan);
+router.post('/scan/crop', scanController.crop); 
 router.get('/scan/download',  scanController.download);
 
 // Rutas de muestra de archivos

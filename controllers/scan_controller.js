@@ -2,6 +2,7 @@ var child = require('child_process');	// Modulo para procesos de terminal
 var fs = require('fs');					// Modulo de archivos de sistema
 
 var s_dir = "scans/"; // Directorio donde se almacenan los escaneos
+var img_dir = "public/images/"; //Directorio donde se almacenan las imagenes publicas
 
 
 // GET /scan/index
@@ -62,6 +63,36 @@ exports.scan = function(req,res,next){
 	res.render("scan/"+mode, { fname: fname, jobid: scan.pid});
 }
 
+// POST /scan/crop
+exports.crop = function(req, res, next){
+
+	var fname = req.body.fname;
+
+	// Eliminamos la vista previa
+	fs.unlink(img_dir+fname.replace(/\s/g,"_")+"_pre.jpg", function (err) {
+	  if (err) next(err);
+	  else console.log("Vista previa de "+fname+" eliminada con exito");
+	});
+
+	// Preparamos los argumentos de scan
+	scanjob = [	req.body.left, 
+				req.body.top,
+				req.body.width, 
+				req.body.height, 
+				fname.replace(/\s/g,"_")];
+
+	// Ejecutamos el comando de escaneado
+	var scan = child.spawn('./bin/scan.sh', scanjob);
+
+	// Conectamos con el socket
+	req.io.on('connection', function (socket){
+		communication(socket, scan, "img", scan.pid);
+	});
+
+	// Enviamos la respuesta y marcamos la conversacion con el pid
+	res.render("scan/img", { fname: fname, jobid: scan.pid});
+}
+
 // GET /scan/download
 exports.download = function(req, res, next){
 
@@ -112,13 +143,5 @@ communication = function communication (socket, scan, mode, pid) {
 	  		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
 	  		communication(this, scan, mode, pid); // Llamada recursiva a communication
 	  	});
-  	} // Si el formato es pre nos preparamos para escanear hoja recortada
-  	else if(mode==="pre"){
-	  	socket.on('crop', function (data){
-	  		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
-	  		communication(this, scan, mode, pid); // Llamada recursiva a communication
-	  	});
   	}
-
-
 }

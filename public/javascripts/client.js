@@ -7,8 +7,9 @@ var id;
 	2. 	Comprobamos el nivel de tinta de cada color
 		y si es menor que el 10% cambiamos el color
 	3.	Ocultamos los botones de escaneado de pdf
-	4. Ocultamos la entrada de la lista de páginas a imprimir
-	5. Ocultamos la seleccion de area en scan/pre
+	4. 	Ocultamos la entrada de la lista de páginas a imprimir
+	5. 	Ocultamos la seleccion de area en scan/pre
+	6. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
 */
 $(document).ready(function() {
 	id = parseInt($("#job").val()); 
@@ -18,6 +19,13 @@ $(document).ready(function() {
 	$(".botones").hide();
 	$("#interval").hide();
 	$("#crop").hide();
+	$('input[name="scan_mode"]').change(function() {
+		if($(this).val()==="img") $('#preview').show();
+		else if($(this).val()==="pdf"){
+			$('#preview').hide();
+			$('#cbox').attr('checked', false); // Si el modo es pdf, deseleccionamos el checkbox
+		}
+	});
 });
 
 // Funcion onclick de "Añadir otra pagina"
@@ -37,6 +45,22 @@ function download() {
 function checkInterval() {
 	if($("#pagemode").val()==="interval") $("#interval").show();	// Si se ha elegido interval se muestra la entrada de texto
 	else $("#interval").hide();										// En cualquier otro caso se oculta
+}
+
+// Funcion que cancela seleccion del area de la imagen en scan/pre
+function cancelSelection(){
+	$("#prueba").imgAreaSelect({instance: true})	// Cancelamos la seleccion
+				.cancelSelection();
+	$('input[name="left"]').val(0);					// Restauramos valores por defecto
+	$('input[name="top"]').val(0);
+	$('input[name="width"]').val(208.5);
+	$('input[name="height"]').val(295.5);
+
+}
+
+// Funcion que pasa de pixeles a centimetros, dividiendo por la escala de 6 y redondeando a un decimal
+function toCms(pixels){
+	return (pixels/6).toFixed(1);
 }
 
 var socket = io.connect('http://192.168.1.200:3000'); // Conectamos con el servidor
@@ -98,7 +122,7 @@ socket.on('pdfend', function (data) {
 	}
 });
 
-socket.on('imgend', function (data) {
+socket.on('preend', function (data) {
 	if(data.jobid===id){
 		$("progress").hide();	// Ocultamos la barra de progreso
 		if(data.success){		// Si ha habido exito cargamos la imagen y preparamos la selección de área
@@ -108,13 +132,14 @@ socket.on('imgend', function (data) {
 				onSelectEnd: function (img, selection) {
 					if(!selection.width || !selection.height) cancelSelection();
 					else{
-	            		$('input[name="left"]').val(selection.x1/6);
-	            		$('input[name="top"]').val(selection.y1/6);
-	            		$('input[name="width"]').val(selection.width/6);
-	            		$('input[name="height"]').val(selection.height/6);  						
+	            		$('input[name="left"]').val(toCms(selection.x1));
+	            		$('input[name="top"]').val(toCms(selection.y1));
+	            		$('input[name="width"]').val(toCms(selection.width));
+	            		$('input[name="height"]').val(toCms(selection.height));  						
 					};
         		}
 			});
+			$("#crop").show();
 		} 
 		else $("#msg").html("Error al escanear");
 	}

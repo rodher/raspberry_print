@@ -7,11 +7,15 @@
     <input type="text" name="filename" id="fname" placeholder="Sin el .jpg o el .pdf"><br>
     Formato: <br>
     <input id="img" type="radio" name="scan_mode" value="img" checked="checked">
-    <label for="img">Imagen</label><br>
+    <label for="img">Imagen</label>
+    <div id="preview" style="display: inline;">
+      <input id="cbox" type="checkbox" name="preview" value="preview">
+      <label for="cbox">Vista previa</label>
+    </div>
+    <br>
     <input id="pdf" type="radio" name="scan_mode" value="pdf">
     <label for="pdf">PDF</label><br>
-    <input id="preview" type="checkbox" name="preview" value="preview">
-    <label for="preview">Vista previa</label>
+
   </div>
 
   <div class="actions">

@@ -8,6 +8,7 @@ var id;
 		y si es menor que el 10% cambiamos el color
 	3.	Ocultamos los botones de escaneado de pdf
 	4. Ocultamos la entrada de la lista de páginas a imprimir
+	5. Ocultamos la seleccion de area en scan/pre
 */
 $(document).ready(function() {
 	id = parseInt($("#job").val()); 
@@ -16,6 +17,7 @@ $(document).ready(function() {
 	});
 	$(".botones").hide();
 	$("#interval").hide();
+	$("#crop").hide();
 });
 
 // Funcion onclick de "Añadir otra pagina"
@@ -91,6 +93,28 @@ socket.on('pdfend', function (data) {
 		if(data.success){
 			$("#msg").html(pages+(pages===1 ? " página escaneada" : " páginas escaneadas"));
 			$(".botones").show();	// Mostramos los botones de accion
+		} 
+		else $("#msg").html("Error al escanear");
+	}
+});
+
+socket.on('imgend', function (data) {
+	if(data.jobid===id){
+		$("progress").hide();	// Ocultamos la barra de progreso
+		if(data.success){		// Si ha habido exito cargamos la imagen y preparamos la selección de área
+			$("#msg").html("Vista previa completada. Selecciona el área que quieres escanear.");
+			$("#imagen").attr('src', '/images/'+$("#fname").val()+'_pre.jpg');
+			$("#imagen").imgAreaSelect({
+				onSelectEnd: function (img, selection) {
+					if(!selection.width || !selection.height) cancelSelection();
+					else{
+	            		$('input[name="left"]').val(selection.x1/6);
+	            		$('input[name="top"]').val(selection.y1/6);
+	            		$('input[name="width"]').val(selection.width/6);
+	            		$('input[name="height"]').val(selection.height/6);  						
+					};
+        		}
+			});
 		} 
 		else $("#msg").html("Error al escanear");
 	}

@@ -5,7 +5,8 @@
 <input type="hidden" id="job" value="<%= jobid %>">
 <br>
 <div id="crop">
-	<input type="button" value="Cancelar selección" onclick="cancelSelection()">
+	<img id="imagen" src="" width="1251" height="1773" alt="Vista previa">
+	<input type="button" value="Cancelar selección" onclick="cancelSelection()"><br>
 	<form method='post' action='/scan/crop'>
 		<input id="fname" type="hidden" name="fname" value="<%= fname %>">
 		<input type="hidden" name="left" value="0" />

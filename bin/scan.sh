@@ -6,9 +6,10 @@
 #		CONSTANTES		#
 #########################
 
-SCAN_DIR='./scans'	# Directorio donde se almacenan los escaneos
-LOG_DIR='./log'		# Directorio donde se almacenan los logs
-MAX_DAYS=30			# Máximo intervalo de días durante los que se almacena un archivo en la aplicacion
+SCAN_DIR='./scans'			# Directorio donde se almacenan los escaneos
+LOG_DIR='./log'				# Directorio donde se almacenan los logs
+IMG_DIR='./public/images'	# Directorio donde se almacenan las imagenes estaticas
+MAX_DAYS=30					# Máximo intervalo de días durante los que se almacena un archivo en la aplicacion
 
 #########################
 #		FUNCIONES		#
@@ -108,6 +109,10 @@ elif [[ $# == 2 ]]; then
 	else
 		echo "Modo de escaneo no admitido" >&2 
 		exit 1
+	fi
+
+	if [[ "$1" == "pre" ]]; then
+		mv  ${SCAN_DIR}/${fname}.jpg ${IMG_DIR}/${fname}.jpg # Movemos resultado a las imagenes publicas
 	fi
 
 # Comportamiento si se usan cinco parametros: Modo recortar

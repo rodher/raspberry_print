@@ -98,16 +98,17 @@ exports.inklevels = function(req,res, next){
     console.log('ink stderr: ' + stderr);
     if (error !== null) next(error);
     if(stdout.match(/Could\snot/)) next(new Error("No se pueden obtener niveles de tinta"));
-    
-    var inklevels ={};
+    else{
+      var inklevels ={};
 
-    // Rellenamos la informacion de nivel de los distintos colores
-    inklevels.cyan=stdout.match(/Cyan:[\s]+([0-9]+)%/)[1];
-    inklevels.magenta=stdout.match(/Magenta:[\s]+([0-9]+)%/)[1];
-    inklevels.yellow=stdout.match(/Yellow:[\s]+([0-9]+)%/)[1];
-    inklevels.black=stdout.match(/Photoblack:[\s]+([0-9]+)%/)[1]; 
+      // Rellenamos la informacion de nivel de los distintos colores
+      inklevels.cyan=stdout.match(/Cyan:[\s]+([0-9]+)%/)[1];
+      inklevels.magenta=stdout.match(/Magenta:[\s]+([0-9]+)%/)[1];
+      inklevels.yellow=stdout.match(/Yellow:[\s]+([0-9]+)%/)[1];
+      inklevels.black=stdout.match(/Photoblack:[\s]+([0-9]+)%/)[1]; 
 
-    res.render("ink",{inklevels: inklevels}); //Enviamos la respuesta
+      res.render("ink",{inklevels: inklevels}); //Enviamos la respuesta
+    }
   });
 
 };

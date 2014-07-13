@@ -56,7 +56,7 @@ exports.scan = function(req,res,next){
 
 	// Conectamos con el socket
 	req.io.on('connection', function (socket){
-		communication(socket, scan, mode, scan.pid);
+		communication(socket, scan, mode, scan.pid, next);
 	});
 
 	// Enviamos la respuesta y marcamos la conversacion con el pid
@@ -86,7 +86,7 @@ exports.crop = function(req, res, next){
 
 	// Conectamos con el socket
 	req.io.on('connection', function (socket){
-		communication(socket, scan, "img", scan.pid);
+		communication(socket, scan, "img", scan.pid, next);
 	});
 
 	// Enviamos la respuesta y marcamos la conversacion con el pid
@@ -113,7 +113,7 @@ exports.download = function(req, res, next){
 	usa como parametros el socket creado, el child process, el modo de
 	escaneado y el pid del proceso para identificar el socket
 */
-communication = function communication (socket, scan, mode, pid) {
+communication = function communication (socket, scan, mode, pid, next) {
 	// Enviamos la salida de datos como mensajes en el cliente
     scan.stdout.on('data', function (chunk) {
     	console.log(chunk.toString());
@@ -141,7 +141,7 @@ communication = function communication (socket, scan, mode, pid) {
   	if(mode==="pdf"){
 	  	socket.on('add', function (data){
 	  		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
-	  		communication(this, scan, mode, pid); // Llamada recursiva a communication
+	  		communication(this, scan, mode, pid, next); // Llamada recursiva a communication
 	  	});
   	}
 }

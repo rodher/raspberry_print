@@ -37,14 +37,25 @@ fntJPG()
 	rm ${PRINT_DIR}/${fname}.${ext}
 }
 
-# Funcion para pasar archivos a blanco y negro
-fntBW() 
+# Funcion para pasar imagenes a blanco y negro
+fntBWimg() 
 {
 
 	echo "Pasando imagen a blanco y negro"
 	convert ${PRINT_DIR}/${file} -modulate 100,0 ${PRINT_DIR}/${file} &> ${LOG_DIR}/convertBW.log
 	fntCheckErrors ${LOG_DIR}/convertBW.log
 	echo 2 # Segundo hito de progreso
+}
+
+# Funcion para pasar documentos a blanco y negro
+fntBWpdf() 
+{
+
+	echo "Pasando documento a blanco y negro"
+	gs -sOutputFile=${PRINT_DIR}/bw_${file} -sDEVICE=pdfwrite -sColorConversionStrategy=Gray -dProcessColorModel=/DeviceGray -dCompatibilityLevel=1.4 -dNOPAUSE -dBATCH ${PRINT_DIR}/${file} &> ${LOG_DIR}/convertBW.log
+	fntCheckErrors ${LOG_DIR}/convertBW.log
+	echo 2 # Segundo hito de progreso
+	mv ${PRINT_DIR}/bw_${file} ${PRINT_DIR}/${file}
 }
 
 # Funcion que determina la lista de páginas a imprimir en caso de imprimir pares o impares
@@ -113,6 +124,9 @@ if [[ "$file_mode" == "img" ]]; then
 	if [[ "$ext" != "jpg" ]]; then
 		fntJPG
 	fi
+	if [[ "$color_mode" == "bw" ]]; then
+		fntBWimg
+	fi
 elif [[ "$file_mode" == "pdf" ]]; then
 	if [[ "$page_mode" == "impar" || "$page_mode" == "par"  ]]; then
 		fntParImpar
@@ -121,10 +135,9 @@ elif [[ "$file_mode" == "pdf" ]]; then
 	if [[ "$page_mode" != "all" ]]; then
 		cmd=${cmd}" -P "${page_list}
 	fi
-fi
-
-if [[ "$color_mode" == "bw" ]]; then
-	fntBW
+	if [[ "$color_mode" == "bw" ]]; then
+		fntBWpdf
+	fi
 fi
 
 fntLP

@@ -55,11 +55,11 @@ fntJPG()
 # Funcion para convertir a pdf
 fntPDF(){
 	echo "Convirtiendo a imagen"
-	convert -quality 75 ${SCAN_DIR}/${fname}.pnm  ${SCAN_DIR}/${fname}_tmp.jpg &> ${LOG_DIR}/convertJPG.log
+	convert -quality 50 ${SCAN_DIR}/${fname}.pnm  ${SCAN_DIR}/${fname}_tmp.jpg &> ${LOG_DIR}/convertJPG.log
 	fntCheckErrors ${LOG_DIR}/convertJPG.log
 	rm ${SCAN_DIR}/${fname}.pnm
 	echo "Convirtiendo a pdf"
-	convert ${SCAN_DIR}/${fname}_tmp.jpg ${SCAN_DIR}/${fname}.pdf &> ${LOG_DIR}/convertPDF.log
+	convert -page A4 ${SCAN_DIR}/${fname}_tmp.jpg ${SCAN_DIR}/${fname}.pdf &> ${LOG_DIR}/convertPDF.log
 	fntCheckErrors ${LOG_DIR}/convertPDF.log
 	rm ${SCAN_DIR}/${fname}_tmp.jpg
 }

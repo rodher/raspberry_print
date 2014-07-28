@@ -37,6 +37,43 @@ fntJPG()
 	rm ${PRINT_DIR}/${fname}.${ext}
 }
 
+# Funcion que extrae las páginas a imprimir en caso de imprimir pares o impares
+fntParImpar(){
+	echo "Extrayendo lista de páginas a imprimir"
+	n="`pdftk ${PRINT_DIR}/${file} dump_data output | grep -i Num | grep -E -o [0-9]+`"
+	if [[ "${page_mode}" == "impar" ]]; then
+		i=1
+	elif [[ "${page_mode}" == "par" ]]; then
+		i=2
+	fi
+	
+	pages="A${i}"
+	for (( i += 2; i <= n; i+=2 )); do
+		pages="${pages} A${i}"
+	done
+	pdftk A=${PRINT_DIR}/${file} cat ${pages} output ${PRINT_DIR}/${fname}_pagelist.pdf &> ${LOG_DIR}/pageList.log
+	fntCheckErrors ${LOG_DIR}/pageList.log
+	echo 1 # Primer hito de progreso
+	mv ${PRINT_DIR}/${fname}_pagelist.pdf ${PRINT_DIR}/${file}
+}
+
+# Funcion que extrae las paginas a imprimir a partir de un intervalo de páginas
+fntInterval(){
+	echo "Extrayendo lista de páginas a imprimir"
+	pages="A"
+	for (( i=0; i<${#page_list}; i++ )); do
+		if [[ "${page_list:$i:1}" == "," ]]; then
+			pages="${pages} A"
+		else
+			pages=${pages}${page_list:$i:1}
+		fi
+	done
+	pdftk A=${PRINT_DIR}/${file} cat ${pages} output ${PRINT_DIR}/${fname}_pagelist.pdf &> ${LOG_DIR}/pageList.log
+	fntCheckErrors ${LOG_DIR}/pageList.log
+	echo 1 # Primer hito de progreso
+	mv ${PRINT_DIR}/${fname}_pagelist.pdf ${PRINT_DIR}/${file}
+}
+
 # Funcion para pasar imagenes a blanco y negro
 fntBWimg() 
 {
@@ -58,28 +95,12 @@ fntBWpdf()
 	mv ${PRINT_DIR}/bw_${file} ${PRINT_DIR}/${file}
 }
 
-# Funcion que determina la lista de páginas a imprimir en caso de imprimir pares o impares
-fntParImpar(){
-	echo "Extrayendo la lista de páginas a imprimir"
-	n="`pdftk ${PRINT_DIR}/${file} dump_data output | grep -i Num | grep -E -o [0-9]+`"
-	if [[ "${page_mode}" == "impar" ]]; then
-		i=1
-	elif [[ "${page_mode}" == "par" ]]; then
-		i=2
-	fi
-	echo 1 # Primer hito de progreso
-	page_list=${i}
-	for (( i += 2; i <= n; i+=2 )); do
-		page_list="${page_list},${i}"
-	done
-}
-
-# funcion que ejecuta el comando de impresion
+# Funcion que ejecuta el comando de impresion
 fntLP() 
 {
 
 	echo "Mandando impresión"
-	${cmd} -n ${ncopy} ${PRINT_DIR}/${file} &> ${LOG_DIR}/LP.log
+	lp -n ${ncopy} ${PRINT_DIR}/${file} &> ${LOG_DIR}/LP.log
 	fntCheckErrors ${LOG_DIR}/LP.log
 	echo 3 # Tercer hito de progreso
 }
@@ -98,7 +119,6 @@ page_mode=$2	 	# Valores: all interval par impar
 page_list=$3 		# Lista de páginas a imprimir
 ncopy=$4			# Número de copias a imprimir
 file=$5				# Archivo a imprimir
-cmd="lp"			# Comando a ejecutar
 fname="${file%.*}"	# Nombre de archivo sin extension
 ext="${file##*.}"	# Extension del archivo
 
@@ -124,17 +144,17 @@ if [[ "$file_mode" == "img" ]]; then
 	if [[ "$ext" != "jpg" ]]; then
 		fntJPG
 	fi
+	
 	if [[ "$color_mode" == "bw" ]]; then
 		fntBWimg
 	fi
 elif [[ "$file_mode" == "pdf" ]]; then
 	if [[ "$page_mode" == "impar" || "$page_mode" == "par"  ]]; then
 		fntParImpar
+	elif [[ "$page_mode" == "interval" ]]; then
+		fntInterval
 	fi
 
-	if [[ "$page_mode" != "all" ]]; then
-		cmd=${cmd}" -P "${page_list}
-	fi
 	if [[ "$color_mode" == "bw" ]]; then
 		fntBWpdf
 	fi

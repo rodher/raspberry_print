@@ -21,7 +21,7 @@ Pasos para desplegar la aplicación:
     sudo apt-get install ink
     
     sudo apt-get install pdftk
-3. Copiar proyecto en /home/pi/raspberry_print/
+3. Copiar proyecto en /home/pi/raspberry_print/. Crear carpetas "log","scans" y "prints", además de generar los módulos de node con "npm install"
 4. Añadir tarea a init.d, copiando el script raspberryprint en /etc/init.d/raspberryprint, y ejecutando:
 
 sudo chmod +x /etc/init.d/raspberryprint

@@ -127,7 +127,7 @@ communication = function communication (socket, scan, mode, pid, next) {
     	if(progress) socket.emit('progress', { progress: progress[1], jobid: pid });
     });
     // Al cerrar avisamos de que el proceso ha terminado, con exito o no
-  	scan.on('close',function(code){
+  	scan.on('exit',function(code){
   		var evt = mode+"end"; // Determinamos evento del socket en funcion del formato de escaneo
     	console.log("Escaneo terminado con codigo "+code);
         if(code===0) socket.emit( evt, { success: true, jobid: pid});

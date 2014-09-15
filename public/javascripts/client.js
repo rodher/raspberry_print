@@ -3,12 +3,13 @@ var pages;
 
 /*	Cuando el documento está cargado:
 	1. 	Guardamos el pid como id de nuestra conversacion
-	2. 	Comprobamos el nivel de tinta de cada color
+	2.	Le damos el valor de las paginas escaneadas a pages
+	3. 	Comprobamos el nivel de tinta de cada color
 		y si es menor que el 10% cambiamos el color
-	3.	Ocultamos los botones de escaneado de pdf
-	4. 	Ocultamos la entrada de la lista de páginas a imprimir
-	5. 	Ocultamos la seleccion de area en scan/pre
-	6. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
+	4.	Ocultamos los botones de escaneado de pdf
+	5. 	Ocultamos la entrada de la lista de páginas a imprimir
+	6. 	Ocultamos la seleccion de area en scan/pre
+	7. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
 */
 $(document).ready(function() {
 	id = parseInt($("#job").val()); 
@@ -30,16 +31,12 @@ $(document).ready(function() {
 
 // Funcion onclick de "Añadir otra pagina"
 function add(){
-	// socket.emit("add", {fname: $("#fname").val()}); // Mandamos orden de imprimir otra pagina
-	// $(".botones").hide(); 							// Ocultamos botones de accion
-	// $("progress").show();							// Mostramos barra de progreso
-	$("#pdfscan").attr('method', 'post');
-	$("#pdfscan").attr('action', '/scan/add');
-	$("#pdfscan").submit();	
-
+	$("#pdfscan").attr('method', 'post'); 		// Cambiamos el metodo REST a POST
+	$("#pdfscan").attr('action', '/scan/add');	// y la ruta a /scan/add
+	$("#pdfscan").submit();						// Y enviamos el formulario
 }
 
-// Funcion onclick del botón de scan/pdf.ejs
+// Funcion onclick del botón de Descarga de scan/pdf.ejs
 function download() {
 	$(".botones").hide();					// Ocultamos botones de accion
 	$("#msg").html("Descargando archivo");	// Cambiamos el mensaje

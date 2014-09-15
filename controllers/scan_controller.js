@@ -111,8 +111,8 @@ exports.download = function(req, res, next){
 
 // POST /scan/add
 exports.add = function(req, res, next){
-	var fname = req.body.fname;
-	var pages = ++req.body.pages;
+	var fname = req.body.fname;		// Extraemos del body el nombre del archivo
+	var pages = ++req.body.pages;	// y el numero de paginas escaneadas, aumentandolo en 1
 	scan = child.spawn('./bin/scan.sh', [fname.replace(/\s/g,"_")]);
 
 	// Conectamos con el socket
@@ -151,12 +151,4 @@ communication = function communication (socket, scan, mode, pid, next) {
           next(new Error("Error de impresión"));
         }
   	});
-
-  	// Si el formato es pdf nos preparamos para añadir nuevas hojas
-/*  	if(mode==="pdf"){
-	  	socket.on('add', function (data){
-	  		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
-	  		communication(this, scan, mode, pid, next); // Llamada recursiva a communication
-	  	});
-  	}*/
 }

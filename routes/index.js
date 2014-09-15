@@ -23,6 +23,7 @@ router.get('/scan/index',  scanController.index);
 router.post('/scan',  scanController.scan);
 router.post('/scan/crop', scanController.crop); 
 router.get('/scan/download',  scanController.download);
+router.post('/scan/add', scanController.add);
 
 // Rutas de muestra de archivos
 router.get('/print/files', fileController.listPrint);

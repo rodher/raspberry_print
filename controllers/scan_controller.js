@@ -60,7 +60,7 @@ exports.scan = function(req,res,next){
 	});
 
 	// Enviamos la respuesta y marcamos la conversacion con el pid
-	res.render("scan/"+mode, { fname: fname, jobid: scan.pid});
+	res.render("scan/"+mode, { fname: fname, jobid: scan.pid, pages: 1});
 }
 
 // POST /scan/crop
@@ -109,6 +109,21 @@ exports.download = function(req, res, next){
 	);
 }
 
+// POST /scan/add
+exports.add = function(req, res, next){
+	var fname = req.body.fname;
+	var pages = ++req.body.pages;
+	scan = child.spawn('./bin/scan.sh', [fname.replace(/\s/g,"_")]);
+
+	// Conectamos con el socket
+	req.io.on('connection', function (socket){
+		communication(socket, scan, "pdf", scan.pid, next);
+	});
+
+	// Enviamos la respuesta y marcamos la conversacion con el pid
+	res.render("scan/pdf", { fname: fname, jobid: scan.pid, pages: pages});	
+}
+
 /* Funcion que implementa la comunicacion por sockets.
 	usa como parametros el socket creado, el child process, el modo de
 	escaneado y el pid del proceso para identificar el socket
@@ -138,10 +153,10 @@ communication = function communication (socket, scan, mode, pid, next) {
   	});
 
   	// Si el formato es pdf nos preparamos para añadir nuevas hojas
-  	if(mode==="pdf"){
+/*  	if(mode==="pdf"){
 	  	socket.on('add', function (data){
 	  		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
 	  		communication(this, scan, mode, pid, next); // Llamada recursiva a communication
 	  	});
-  	}
+  	}*/
 }

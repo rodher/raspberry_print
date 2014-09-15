@@ -1,5 +1,3 @@
-
-var pages=0;
 var id;
 
 /*	Cuando el documento está cargado:
@@ -13,6 +11,7 @@ var id;
 */
 $(document).ready(function() {
 	id = parseInt($("#job").val()); 
+	var pages=parseInt($("#pages").val());
 	$(".inkbar").each(function(){
 		if($(this).val()<=10) $(this).attr('id', 'emptybar');
 	});
@@ -30,15 +29,20 @@ $(document).ready(function() {
 
 // Funcion onclick de "Añadir otra pagina"
 function add(){
-	socket.emit("add", {fname: $("#fname").val()}); // Mandamos orden de imprimir otra pagina
-	$(".botones").hide(); 							// Ocultamos botones de accion
-	$("progress").show();							// Mostramos barra de progreso
+	// socket.emit("add", {fname: $("#fname").val()}); // Mandamos orden de imprimir otra pagina
+	// $(".botones").hide(); 							// Ocultamos botones de accion
+	// $("progress").show();							// Mostramos barra de progreso
+	$("#pdfscan").attr('method', 'post');
+	$("#pdfscan").attr('action', '/scan/add');
+	$("#pdfscan").submit();	
+
 }
 
-// Funcion onsubmit del formulario de scan/pdf.ejs
+// Funcion onclick del botón de scan/pdf.ejs
 function download() {
 	$(".botones").hide();					// Ocultamos botones de accion
 	$("#msg").html("Descargando archivo");	// Cambiamos el mensaje
+	$("#pdfscan").submit();					// Enviamos formulario
 }
 
 // Funcion onchange del formulario de modo de paginas de impresion
@@ -113,7 +117,7 @@ socket.on('imgend', function (data) {
 socket.on('pdfend', function (data) {
 	if(data.jobid===id){
 		$("progress").hide(); // Ocultamos la barra de progreso
-		pages++;			  // Aumentamos la cuenta de paginas escaneadas
+		//pages++;			  // Aumentamos la cuenta de paginas escaneadas
 		if(data.success){
 			$("#msg").html(pages+(pages===1 ? " página escaneada" : " páginas escaneadas"));
 			$(".botones").show();	// Mostramos los botones de accion

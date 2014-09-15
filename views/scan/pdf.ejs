@@ -4,10 +4,10 @@
 <progress value="0" max="100"></progress>
 <input type="hidden" id="job" value="<%= jobid %>">
 <br>
-<form name="pdfscan" method='get' action='/scan/download'>
+<form id="pdfscan" method='get' action='/scan/download'>
 	<input id="fname" type="hidden" name="fname" value="<%= fname %>">
 	<input type="hidden" name="ext" value="pdf">
-	<input type="hidden" name="pages" value="<%= pages %>">
+	<input type="hidden" name="pages" id="pages" value="<%= pages %>">
 	<input class="botones" type="button" name="boton" value="Añadir otra página" onclick="add()" />
 	<input class="botones" type="button" value="Terminar" name="commit" onclick="download()" />
 </form>

@@ -1,4 +1,5 @@
 var id;
+var pages;
 
 /*	Cuando el documento está cargado:
 	1. 	Guardamos el pid como id de nuestra conversacion
@@ -11,7 +12,7 @@ var id;
 */
 $(document).ready(function() {
 	id = parseInt($("#job").val()); 
-	var pages=parseInt($("#pages").val());
+	pages=parseInt($("#pages").val());
 	$(".inkbar").each(function(){
 		if($(this).val()<=10) $(this).attr('id', 'emptybar');
 	});

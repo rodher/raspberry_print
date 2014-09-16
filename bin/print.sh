@@ -109,7 +109,7 @@ fntLP()
 #		VARIABLES		#
 #########################
 
-if [[ $# != 5 ]]; then
+if [[ $# != 6 ]]; then
 	echo "Número incorrecto de argumentos" >&2
 	exit 1
 fi

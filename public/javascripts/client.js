@@ -22,6 +22,9 @@ $(document).ready(function() {
 	$(".botones").hide();
 	$(".printhid").hide();
 	$("#crop").hide();
+	$("#size").keydown(function(){
+		$("#sizelist").val("custom");
+	});
 	$('input[name="scan_mode"]').change(function() {
 		if($(this).val()==="img") $('#preview').show();
 		else if($(this).val()==="pdf"){

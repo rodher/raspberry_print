@@ -50,15 +50,17 @@ function download() {
 
 // Funcion onchange del boton de subida de archivos para imprimir
 function fileSelected() {
-	var ext = $("#printing").val().match(/\.[0-9a-z]+$/i)[0];	// Extraemos la extension del archivo subido
-	if(ext===".pdf"){
-		$("#divsize").hide();
-		$("#size").val("");
-	}
-	else{
-		$("#sizelist").val("full");
-		$("#size").val(sizes["full"]);
-		$("#divsize").show();
+	var ext = $("#printing").val().match(/\.[0-9a-z]+$/i);	// Extraemos la extension del archivo subido
+	if(ext){
+		if(ext[0]===".pdf"){
+			$("#divsize").hide();
+			$("#size").val("");
+		}
+		else{
+			$("#sizelist").val("full");
+			$("#size").val(sizes["full"]);
+			$("#divsize").show();
+		}		
 	}
 }
 

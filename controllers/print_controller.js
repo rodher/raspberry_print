@@ -119,7 +119,7 @@ exports.inklevels = function(req,res, next){
 validate =function(printjob){
 
   // No se valida si no hay ningun archivo subido
-  if(!printjob[4]){
+  if(!printjob[5]){
     return false;
   }
 

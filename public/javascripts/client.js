@@ -11,7 +11,8 @@ var sizes ={full: "28.5", a5: "21", frame: "15", carnet: "3.2"};	// Array de tam
 	4.	Ocultamos los botones de escaneado de pdf
 	5. 	Ocultamos parte del formulario de impresion
 	6. 	Ocultamos la seleccion de area en scan/pre
-	7. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
+	7. 	Añadimos cambio automatico de la lista de tamaños de impresion al modificar la entrada de texto del tamaño
+	8. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
 */
 $(document).ready(function() {
 	id = parseInt($("#job").val()); 
@@ -22,9 +23,9 @@ $(document).ready(function() {
 	$(".botones").hide();
 	$(".printhid").hide();
 	$("#crop").hide();
-	$("#size").change(function(){
-		$("#sizelist").val("custom");
-	});
+	var fsize = function(){$("#sizelist").val("custom");};
+	$("#size").change(fsize);
+	$("#size").keydown(fsize);
 	$('input[name="scan_mode"]').change(function() {
 		if($(this).val()==="img") $('#preview').show();
 		else if($(this).val()==="pdf"){
@@ -52,22 +53,23 @@ function download() {
 function fileSelected() {
 	var ext = $("#printing").val().match(/\.[0-9a-z]+$/i);	// Extraemos la extension del archivo subido
 	if(ext){
-		if(ext[0]===".pdf"){
+		if(ext[0]===".pdf"){				// Si se trata de un pdf, ocultamos seleccion de tamaño y borramos valor
 			$("#divsize").hide();
 			$("#size").val("");
 		}
 		else{
-			$("#sizelist").val("full");
-			$("#size").val(sizes["full"]);
+			$("#sizelist").val("full");		// Si se trata de una imagen, mostramos seleccion de tamaño y
+			$("#size").val(sizes["full"]);	// seleccionamos el tamaño de pagina completa
 			$("#divsize").show();
 		}		
 	}
 }
 
+// Funcion onchange del selector de tamaño de impresion
 function checkSize() {
-	var pagesize = $("#sizelist").val();
-	if(pagesize==="custom") $("#size").focus();
-	else $("#size").val(sizes[pagesize]);
+	var pagesize = $("#sizelist").val();		// Si el valor es Altura personalizada, cambiamos foco a la caja de texto
+	if(pagesize==="custom") $("#size").focus();	// En cualquier otro caso escribimos en la caja de texto el tamaño
+	else $("#size").val(sizes[pagesize]);		// correspondiente buscandolo en el array de tamaños de impresion
 }
 
 // Funcion onchange del formulario de modo de paginas de impresion

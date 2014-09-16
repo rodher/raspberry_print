@@ -39,9 +39,9 @@ exports.print = function(req, res, next) {
       next(err);
     }
 
-    var fname=files.archivo[0].originalFilename;
-    var size=parseFloat(fields.psize[0]) || 28.5;
-    size=Math.round(100*size/28.5);
+    var fname=files.archivo[0].originalFilename;  // Extraemos nombre de archivo
+    var size=parseFloat(fields.psize[0]) || 28.5; // Extraemos tamaño de impresion; usamos por defecto 28.5 cm
+    size=Math.round(100*size/28.5);               // Convertimos tamaño de impresion en porcentaje sobre la pagina completa
 
     // Creamos el array de argumentos para el comando de impresion
     var printjob=[fields.mode[0], 

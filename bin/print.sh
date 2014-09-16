@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Ejemplo de uso: print.sh colormode pagemode pagelist ncopy file
+# Ejemplo de uso: print.sh colormode pagemode pagelist size ncopy file
 # Profundidad de progreso 3
 
 #########################
@@ -100,7 +100,7 @@ fntLP()
 {
 
 	echo "Mandando impresión"
-	lp -n ${ncopy} ${PRINT_DIR}/${file} &> ${LOG_DIR}/LP.log
+	lp -o scaling=${size} -n ${ncopy} ${PRINT_DIR}/${file} &> ${LOG_DIR}/LP.log
 	fntCheckErrors ${LOG_DIR}/LP.log
 	echo 3 # Tercer hito de progreso
 }
@@ -117,8 +117,9 @@ fi
 color_mode=$1 		# Valores: color bw
 page_mode=$2	 	# Valores: all interval par impar
 page_list=$3 		# Lista de páginas a imprimir
-ncopy=$4			# Número de copias a imprimir
-file=$5				# Archivo a imprimir
+size=$4				# Tamaño de la impresion en porcentaje
+ncopy=$5			# Número de copias a imprimir
+file=$6				# Archivo a imprimir
 fname="${file%.*}"	# Nombre de archivo sin extension
 ext="${file##*.}"	# Extension del archivo
 

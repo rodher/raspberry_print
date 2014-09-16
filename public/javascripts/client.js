@@ -47,7 +47,7 @@ function download() {
 
 // Funcion onchange del boton de subida de archivos para imprimir
 function fileSelected() {
-	var ext = $("#printing").val().match(/\.[0-9a-z]+$/i);	// Extraemos la extension del archivo subido
+	var ext = $("#printing").val().match(/\.[0-9a-z]+$/i)[0];	// Extraemos la extension del archivo subido
 	if(ext===".pdf"){
 		$("#divsize").hide();
 		$("#size").val("");

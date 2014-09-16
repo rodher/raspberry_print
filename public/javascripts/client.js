@@ -1,13 +1,15 @@
 var id;
 var pages;
 
+var sizes ={full: "28.5", a5: "21", frame: "15", carnet: "3.2"};	// Array de tamaños de impresion
+
 /*	Cuando el documento está cargado:
 	1. 	Guardamos el pid como id de nuestra conversacion
 	2.	Le damos el valor de las paginas escaneadas a pages
 	3. 	Comprobamos el nivel de tinta de cada color
 		y si es menor que el 10% cambiamos el color
 	4.	Ocultamos los botones de escaneado de pdf
-	5. 	Ocultamos la entrada de la lista de páginas a imprimir
+	5. 	Ocultamos parte del formulario de impresion
 	6. 	Ocultamos la seleccion de area en scan/pre
 	7. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
 */
@@ -18,7 +20,7 @@ $(document).ready(function() {
 		if($(this).val()<=10) $(this).attr('id', 'emptybar');
 	});
 	$(".botones").hide();
-	$("#interval").hide();
+	$(".printhid").hide();
 	$("#crop").hide();
 	$('input[name="scan_mode"]').change(function() {
 		if($(this).val()==="img") $('#preview').show();
@@ -41,6 +43,26 @@ function download() {
 	$(".botones").hide();					// Ocultamos botones de accion
 	$("#msg").html("Descargando archivo");	// Cambiamos el mensaje
 	$("#pdfscan").submit();					// Enviamos formulario
+}
+
+// Funcion onchange del boton de subida de archivos para imprimir
+function fileSelected() {
+	var ext = $("#printing").val().match(/\.[0-9a-z]+$/i);	// Extraemos la extension del archivo subido
+	if(ext===".pdf"){
+		$("#divsize").hide();
+		$("#size").val("");
+	}
+	else{
+		$("#sizelist").val("full");
+		$("#size").val(sizes["full"]);
+		$("#divsize").show();
+	}
+}
+
+function checkSize() {
+	var pagesize = $("#sizelist").val();
+	if(pagesize==="custom") $("#size").focus();
+	else $("#size").val(sizes[pagesize]);
 }
 
 // Funcion onchange del formulario de modo de paginas de impresion

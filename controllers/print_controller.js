@@ -40,11 +40,14 @@ exports.print = function(req, res, next) {
     }
 
     var fname=files.archivo[0].originalFilename;
+    var size=parseFloat(fields.psize[0]) || 28.5;
+    size=Math.round(100*size/28.5);
 
     // Creamos el array de argumentos para el comando de impresion
     var printjob=[fields.mode[0], 
                   fields.page_mode[0], 
                   fields.page_interval[0],
+                  size.toString(),
                   fields.ncopy[0],
                   fname.replace(/\s/g,"_") ];
 

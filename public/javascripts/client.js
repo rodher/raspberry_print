@@ -22,7 +22,7 @@ $(document).ready(function() {
 	$(".botones").hide();
 	$(".printhid").hide();
 	$("#crop").hide();
-	$("#size").keydown(function(){
+	$("#size").change(function(){
 		$("#sizelist").val("custom");
 	});
 	$('input[name="scan_mode"]').change(function() {

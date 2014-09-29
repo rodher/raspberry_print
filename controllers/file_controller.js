@@ -31,11 +31,13 @@ exports.downloadPrint = function(req, res, next){
 exports.destroyPrint = function(req, res, next){
 	fs.unlink('prints/'+req.params.file, function (err) {
 	  if (err) next(err);
-	  else console.log(req.params.file+" eliminado con exito");
-	});
-	fs.readdir('prints',function(err, files){
-		console.log(files);
-		res.render("print/files", {files: files, kind: "print"});
+	  else{
+	  	console.log(req.params.file+" eliminado con exito");
+		fs.readdir('prints',function(err, files){
+			console.log(files);
+			res.render("print/files", {files: files, kind: "print"});
+		});
+	  } 
 	});
 };
 
@@ -65,10 +67,12 @@ exports.downloadScan = function(req, res, next){
 exports.destroyScan = function(req, res, next){
 	fs.unlink('scans/'+req.params.file, function (err) {
 	  if (err) next(err);
-	  else console.log(req.params.file+" eliminado con exito");
-	});
-	fs.readdir('scans',function(err, files){
-		console.log(files);
-		res.render("scan/files", {files: files, kind: "scan"});
+	  else{
+	  	console.log(req.params.file+" eliminado con exito");
+		fs.readdir('scans',function(err, files){
+			console.log(files);
+			res.render("scan/files", {files: files, kind: "scan"});
+		});
+	  } 
 	});
 };

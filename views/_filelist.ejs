@@ -11,12 +11,11 @@
 			<img src='/images/pdficon.png' alt='PDF icon' height='20'/>
 			<%= files[i] %>
 		</a>
-	<% } %>
-		<form method="post" action="/<%= kind %>/<%= files[i] %>" style="display: inline">
-			<input type='hidden' name='_method' value='delete'>
+	<% } else continue; %>
+		<form id="<%= files[i]%>_form" method="post" action="/<%= kind %>/<%= files[i] %>?_method=DELETE" style="display: inline">
 			<a href="/<%= kind %>/download/<%= files[i] %>">
 				<img src='/images/download.png' alt='Download' title="Descargar" height='20'/></a>
-			<a href="" onclick="this.form.submit();">
+			<a href="" onclick="submitDelete('<%=kind %>','<%=files[i]%>'); return false;">
 				<img src='/images/delete.png' alt='Delete' title="Borrar" height='20'/></a>
 		</form><br>
 <% } %>

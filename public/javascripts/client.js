@@ -94,6 +94,10 @@ function toCms(pixels){
 	return (pixels/2).toFixed(1);
 }
 
+// Funcion que envia el formulario de borrado de archivos
+function submitDelete(kind, file){
+	$("form[action='/"+kind+"/"+file+"?_method=DELETE']").submit();
+}
 var socket = io.connect('http://192.168.1.200:3000'); // Conectamos con el servidor
 
 

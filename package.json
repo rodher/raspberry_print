@@ -17,6 +17,7 @@
     "multiparty": "^3.2.7",
     "exec": "^0.1.1",
     "socket.io": "^1.0.4",
-    "connect": "^3.2.0"
+    "connect": "^3.2.0",
+    "method-override": "^2.2.0"
   }
 }

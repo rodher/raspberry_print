@@ -27,6 +27,18 @@ exports.downloadPrint = function(req, res, next){
 	});
 };
 
+// DELETE /print/Hola.pdf
+exports.destroyPrint = function(req, res, next){
+	fs.unlink('prints/'+req.params.file, function (err) {
+	  if (err) next(err);
+	  else console.log(req.params.file+" eliminado con exito");
+	});
+	fs.readdir('prints',function(err, files){
+		console.log(files);
+		res.render("print/files", {files: files, kind: "print"});
+	});
+};
+
 // GET /scan/files
 exports.listScan = function(req, res, next){
 	fs.readdir('scans',function(err, files){
@@ -46,5 +58,17 @@ exports.showScan = function(req, res, next){
 exports.downloadScan = function(req, res, next){
 	res.download('scans/'+req.params.file, function(err){
 		if(err) next(err);
+	});
+};
+
+// DELETE /scan/Hola.pdf
+exports.destroyScan = function(req, res, next){
+	fs.unlink('scans/'+req.params.file, function (err) {
+	  if (err) next(err);
+	  else console.log(req.params.file+" eliminado con exito");
+	});
+	fs.readdir('scans',function(err, files){
+		console.log(files);
+		res.render("scan/files", {files: files, kind: "scan"});
 	});
 };

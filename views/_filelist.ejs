@@ -12,13 +12,11 @@
 			<%= files[i] %>
 		</a>
 	<% } %>
-		<form method="post" action="/<%= kind %>/<%= files[i] %>">
+		<form method="post" action="/<%= kind %>/<%= files[i] %>" style="display: inline">
 			<input type='hidden' name='_method' value='delete'>
 			<a href="/<%= kind %>/download/<%= files[i] %>">
-				<img src='/images/download.png' alt='Download' title="Descargar" height='20'/>
-			</a>
+				<img src='/images/download.png' alt='Download' title="Descargar" height='20'/></a>
 			<a href="" onclick="this.form.submit();">
-				<img src='/images/delete.png' alt='Delete' title="Borrar" height='20'/>
-			</a>
+				<img src='/images/delete.png' alt='Delete' title="Borrar" height='20'/></a>
 		</form><br>
 <% } %>

@@ -20,6 +20,13 @@ exports.showPrint = function(req, res, next){
 	});
 };
 
+// GET /print/download/Hola.pdf
+exports.downloadPrint = function(req, res, next){
+	res.download('prints/'+req.params.file, function(err){
+		if(err) next(err);
+	});
+};
+
 // GET /scan/files
 exports.listScan = function(req, res, next){
 	fs.readdir('scans',function(err, files){
@@ -31,6 +38,13 @@ exports.listScan = function(req, res, next){
 // GET /scan/show/Hola.pdf
 exports.showScan = function(req, res, next){
 	res.sendfile('scans/'+req.params.file, function(err){
+		if(err) next(err);
+	});
+};
+
+// GET /scan/download/Hola.pdf
+exports.downloadScan = function(req, res, next){
+	res.download('scans/'+req.params.file, function(err){
 		if(err) next(err);
 	});
 };

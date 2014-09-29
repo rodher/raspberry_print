@@ -26,11 +26,15 @@ router.get('/scan/download',  scanController.download);
 router.post('/scan/add', scanController.add);
 
 // Rutas de muestra de archivos
+router.get('/files', fileController.index);
 router.get('/print/files', fileController.listPrint);
 router.get('/print/show/:file', fileController.showPrint);
+router.get('/print/download/:file', fileController.downloadPrint);
+router.delete('/print/:file', fileController.destroyPrint);
 router.get('/scan/files', fileController.listScan);
 router.get('/scan/show/:file', fileController.showScan);
-router.get('/files', fileController.index);
+router.get('/scan/download/:file', fileController.downloadScan);
+router.delete('/scan/:file', fileController.destroyScan);
 
 // Ruta de ayuda
 router.get('/help', function(req, res, next){

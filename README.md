@@ -22,6 +22,7 @@ Pasos para desplegar la aplicación:
     
     sudo apt-get install pdftk
 3. Copiar proyecto en /home/pi/raspberry_print/. Crear carpetas "log","scans" y "prints", además de generar los módulos de node con "npm install"
+
 4. Despliegue de servidor de impresión en nube con Google Cloud Print: http://www.howtogeek.com/169566/how-to-turn-a-raspberry-pi-into-a-google-cloud-print-server/
 5. Añadir tareas de la carpeta init a init.d, copiando los respectivos scripts raspberryprint en /etc/init.d/raspberryprint, y ejecutando:
 

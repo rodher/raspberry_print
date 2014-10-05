@@ -1,0 +1,30 @@
+#! /bin/bash
+# /etc/init.d/chromium
+
+### BEGIN INIT INFO
+# Provides:        chromium
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:    $remote_fs $syslog
+# Default-Start:    2 3 4 5
+# Default-Stop:        0 1 6
+# Short-Description:    Iniciador automatico de chromium
+# Description:        Iniciador automatico de chromium
+### END INIT INFO 
+ 
+# Carry out start/stop/restart actions
+case "$1" in
+    start)
+        echo "Abriendo headless chromium"
+        sudo -u pi /usr/bin/chromium --type=service &> /dev/null &
+        ;;
+    stop)
+        echo "Matando todos los procesos Chromium"
+        killall chromium
+        ;;
+    *)
+        echo "Uso: /etc/init.d/chromium {start|stop}"
+        exit 1
+        ;;
+esac
+ 
+exit 0

@@ -26,11 +26,17 @@ Pasos para desplegar la aplicación:
 4. Despliegue de servidor de impresión en nube con Google Cloud Print: http://www.howtogeek.com/169566/how-to-turn-a-raspberry-pi-into-a-google-cloud-print-server/
 5. Añadir tareas de la carpeta init a init.d, copiando los respectivos scripts raspberryprint en /etc/init.d/raspberryprint, y ejecutando:
 
-	sudo chmod +x /home/pi/raspberry_print/init/*
+	chmod +x /home/pi/raspberry_print/init/*
 
 	sudo cp /home/pi/raspberry_print/init/* /etc/init.d/
 
 	sudo update-rc.d raspberryprint defaults
 
 	sudo update-rc.d chromium defaults
+6. Añadir control diario para matar procesos zombies de chromium. Copia los scripts de la carpeta chromium en sus respectivos sitios:
+	
+	chmod +x  /home/pi/raspberry_print/chromium/*
+	
+	sudo cp /home/pi/raspberry_print/chromium/cloudchromium /usr/bin/
 
+	sudo cp /home/pi/raspberry_print/chromium/chromium /etc/cron.daily/

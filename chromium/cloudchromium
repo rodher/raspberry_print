@@ -1,0 +1,4 @@
+#!/bin/sh
+
+killall -q chromium
+sudo -u pi /usr/bin/chromium --type=service &> /dev/null &

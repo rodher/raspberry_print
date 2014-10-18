@@ -59,9 +59,11 @@ exports.print = function(req, res, next) {
 
       //Ejecutamos el comando de impresion
       var print = child.spawn('./bin/print.sh', printjob);
+      print.setMaxListeners(0); // Evitamos warning de memory leak
 
       // Conectamos con el socket
       req.io.on('connection', function (socket){
+
         // Enviamos información a través del socket
         print.stdout.on('data', function (chunk) {
           var data = chunk.toString(); // Convertimos de Buffer a String

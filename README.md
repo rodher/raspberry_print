@@ -13,22 +13,35 @@ Pasos para desplegar la aplicación:
     Necesitas instalar CUPS, SANE, Nodejs, Imagemagick, ink y pdftk
 
     sudo apt-get install cups
+    
     sudo usermod -a -G lpadmin pi
+    
     sudo cp /home/pi/raspberry_print/conf/cupsd.conf /etc/cups/cupsd.conf
+    
     sudo /etc/init.d/cups restart
+    
     Añade impresora en 192.168.1.200:631
     
+    
     sudo aptitude update
+    
     sudo aptitude install xinetd sane-utils
+    
     sudo cp /home/pi/raspberry_print/conf/saned /etc/default/saned 
     
+    
     wget http://node-arm.herokuapp.com/node_latest_armhf.deb
+    
     sudo dpkg -i node_latest_armhf.deb
+    
     rm node_latest_armhf.deb
+    
     
     sudo apt-get install imagemagick
     
+    
     sudo apt-get install ink
+    
     
     sudo apt-get install pdftk
 3. Copiar proyecto en /home/pi/raspberry_print/. Crear carpetas "log","scans" y "prints", además de generar los módulos de node con "npm install"
@@ -53,8 +66,8 @@ Pasos para desplegar la aplicación:
 	
 Referencias:
 
-	https://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address
-	http://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer/
-	http://blog.pi3g.com/2013/04/raspberry-pi-sharing-a-scanner-with-the-network-even-windows/
-	http://revryl.com/2014/01/04/nodejs-raspberry-pi/
+https://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address
+http://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer/
+http://blog.pi3g.com/2013/04/raspberry-pi-sharing-a-scanner-with-the-network-even-windows/
+http://revryl.com/2014/01/04/nodejs-raspberry-pi/
 

@@ -17,7 +17,7 @@ Pasos para desplegar la aplicación:
     sudo cp /home/pi/raspberry_print/conf/cupsd.conf /etc/cups/cupsd.conf
     sudo /etc/init.d/cups restart
     Añade impresora en 192.168.1.200:631
-
+    
     sudo aptitude update
     sudo aptitude install xinetd sane-utils
     sudo cp /home/pi/raspberry_print/conf/saned /etc/default/saned 
@@ -25,8 +25,6 @@ Pasos para desplegar la aplicación:
     wget http://node-arm.herokuapp.com/node_latest_armhf.deb
     sudo dpkg -i node_latest_armhf.deb
     rm node_latest_armhf.deb
-    
-    http://revryl.com/2014/01/04/nodejs-raspberry-pi/
     
     sudo apt-get install imagemagick
     

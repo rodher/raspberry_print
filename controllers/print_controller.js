@@ -123,7 +123,28 @@ exports.settings= function(req,res, next){
   var jobs = {19: {fname: "Prueba.pdf", status: "Pausado", lvl: false},
               24: {fname: "Prueba.jpg", status: "Imprimiendo", lvl: 92}};
 
-  res.render("settings", {ready: true, accept: true, jobs: jobs});
+  child.exec('lpstat -p', function (error, stdout, stderr) {
+    console.log('printer stat stdout: ' + stdout);
+    console.log('printer stat stderr: ' + stderr);
+    if (error === null) {
+
+      var pstat = stdout.match(/está\s([a-z]+)/);
+      if(pstat=== null) next(new Error("No se puede acceder a la impresora"));
+      else{
+        var ready;
+        if(pstat[1]==="deshabilitada") ready=false;
+        else ready=pstat[1];
+        var accept=!(stdout.match(/Rejecting\sJobs/));
+      }
+
+      res.render("settings", {ready: "Imprimiendo", accept: true, jobs: jobs});
+      
+    } else{
+      next(error);
+    }
+  });
+
+  res.render("settings", {ready: "Imprimiendo", accept: true, jobs: jobs});
 };
 
 validate =function(printjob){

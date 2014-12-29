@@ -120,9 +120,6 @@ exports.inklevels = function(req,res, next){
 // GET /settings
 exports.settings= function(req,res, next){
 
-  var jobs = {19: {fname: "Prueba.pdf", status: "Pausado", lvl: false},
-              24: {fname: "Prueba.jpg", status: "Imprimiendo", lvl: 92}};
-
   child.exec('lpstat -p', function (error, stdout, stderr) {
     console.log('printer stat stdout: ' + stdout);
     console.log('printer stat stderr: ' + stderr);
@@ -137,8 +134,18 @@ exports.settings= function(req,res, next){
         var accept=!(stdout.match(/Rejecting\sJobs/));
       }
 
-      res.render("settings", {ready: ready, accept: accept, jobs: jobs});
-
+      child.exec('lpq', function (error, stdout, stderr) {
+          console.log('jobs queue stdout: ' + stdout);
+          console.log('jobs queue stderr: ' + stderr);
+          if (error) next(error);
+          var jobstrings = stdout.match(/pi[\s]+[0-9]+[\s]+[^\s]+/gm);
+          var jobs={};
+          for(var i in jobstrings){
+            var jobparams = jobstrings[i].match(/pi[\s]+([0-9]+)[\s]+([^\s]+)/);
+            jobs[jobparams[1]]={fname: jobparams[2], status: "Hola", lvl: false};
+          }
+          res.render("settings", {ready: ready, accept: accept, jobs: jobs});
+      });
     } else{
       next(error);
     }

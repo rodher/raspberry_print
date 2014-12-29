@@ -137,7 +137,7 @@ exports.settings= function(req,res, next){
         var accept=!(stdout.match(/Rejecting\sJobs/));
       }
 
-      res.render("settings", {ready: ready, accept: accept jobs: jobs});
+      res.render("settings", {ready: ready, accept: accept, jobs: jobs});
 
     } else{
       next(error);

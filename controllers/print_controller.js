@@ -115,7 +115,15 @@ exports.inklevels = function(req,res, next){
       res.render("ink",{inklevels: inklevels}); //Enviamos la respuesta
     }
   });
+};
 
+// GET /settings
+exports.settings= function(req,res, next){
+
+  var jobs = {19: {fname: "Prueba.pdf", status: "Pausado", lvl: false},
+              24: {fname: "Prueba.jpg", status: "Imprimiendo", lvl: 92}};
+
+  res.render("settings", {ready: true, accept: true, jobs: jobs});
 };
 
 validate =function(printjob){

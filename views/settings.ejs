@@ -1,0 +1,29 @@
+<h2>Ajustes de Impresión</h2>
+
+<h3>EPSON Stylus DX7400</h3>
+<u>Estado:</u> <%= ready ? "Lista para imprimir" : "Pausada" %><br>
+<u>Cola de impresión:</u> <%= accept ? "Aceptando trabajos" : "Rechazando trabajos" %>
+<hr />
+<h3>Cola de impresión</h3>
+<div id=pqueue >
+	<table class="settingstable">
+		<tr>
+			<td>Nombre</td>
+			<td>Estado</td>
+			<td>Progreso</td>
+		</tr>
+		<% for(var i in jobs){ %>
+			<tr>
+				<td><%= jobs[i].fname %></td>
+				<td><%= jobs[i].status %></td>
+				<td>
+				<% if(jobs[i].lvl){ %>
+					<progress value="<%= jobs[i].lvl %>" max="100"></progress>
+				<% } %></td>
+			</tr>
+		<% } %>
+	</table>
+</div>
+<br>
+<br>
+<a href="/"> Inicio</a>

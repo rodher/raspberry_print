@@ -4,6 +4,8 @@ var fs = require('fs');                 // Modulo de archivos de sistema
 
 var p_dir = "prints/";  // Directorio donde se almacenan las impresiones
 
+var printer = "EPSON_Stylus_DX7400"; // Impresora por defecto del sistema
+
 // GET /print
 exports.index = function(req, res, next) {
 
@@ -134,7 +136,7 @@ exports.settings= function(req,res, next){
         var accept=!(stdout.match(/Rejecting\sJobs/));
       }
 
-      child.exec('lpq', function (error, stdout, stderr) {
+      child.exec('lpq -P '+printer, function (error, stdout, stderr) {
           console.log('jobs queue stdout: ' + stdout);
           console.log('jobs queue stderr: ' + stderr);
           if (error) next(error);

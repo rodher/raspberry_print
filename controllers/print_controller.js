@@ -137,14 +137,12 @@ exports.settings= function(req,res, next){
         var accept=!(stdout.match(/Rejecting\sJobs/));
       }
 
-      res.render("settings", {ready: "Imprimiendo", accept: true, jobs: jobs});
-      
+      res.render("settings", {ready: ready, accept: accept jobs: jobs});
+
     } else{
       next(error);
     }
   });
-
-  res.render("settings", {ready: "Imprimiendo", accept: true, jobs: jobs});
 };
 
 validate =function(printjob){

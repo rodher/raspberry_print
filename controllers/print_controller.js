@@ -143,7 +143,7 @@ exports.settings= function(req,res, next){
       var jobs={};
       for(var i in jobstrings){
         var jobparams = jobstrings[i].match(/pi[\s]+([0-9]+)[\s]+([^\s]+)/);
-        jobs[jobparams[1]]={fname: jobparams[2], stat: "Hola", lvl: false};
+        jobs[jobparams[1]]={fname: jobparams[2]};
       }
       child.exec('lpstat -l -U pi '+printer, function (error, stdout, stderr) {
         console.log('job status stdout: ' + stdout);
@@ -153,7 +153,7 @@ exports.settings= function(req,res, next){
           var regex= new RegExp("\-"+i+".*\n(.*)")
           var statline=stdout.match(regex);
           if(statline){
-            jobs[i].stat = statline[1].match(/\:\s([a-z0-9\s]+)/i)[1];
+            jobs[i].stat = statline[1].match(/\:\s([a-z0-9\s\-]+)/i)[1];
             var prog = statline[1].match(/([0-9]+)\%/);
             if(prog) jobs[i].lvl = prog[1];
             else jobs[i].lvl = false;

@@ -125,32 +125,43 @@ exports.settings= function(req,res, next){
   child.exec('lpstat -p', function (error, stdout, stderr) {
     console.log('printer stat stdout: ' + stdout);
     console.log('printer stat stderr: ' + stderr);
-    if (error === null) {
-
-      var pstat = stdout.match(/está\s([a-z]+)/);
-      if(pstat=== null) next(new Error("No se puede acceder a la impresora"));
-      else{
-        var ready;
-        if(pstat[1]==="deshabilitada") ready=false;
-        else ready=pstat[1];
-        var accept=!(stdout.match(/Rejecting\sJobs/));
-      }
-
-      child.exec('lpq -P '+printer, function (error, stdout, stderr) {
-          console.log('jobs queue stdout: ' + stdout);
-          console.log('jobs queue stderr: ' + stderr);
-          if (error) next(error);
-          var jobstrings = stdout.match(/pi[\s]+[0-9]+[\s]+[^\s]+/gm);
-          var jobs={};
-          for(var i in jobstrings){
-            var jobparams = jobstrings[i].match(/pi[\s]+([0-9]+)[\s]+([^\s]+)/);
-            jobs[jobparams[1]]={fname: jobparams[2], status: "Hola", lvl: false};
-          }
-          res.render("settings", {ready: ready, accept: accept, jobs: jobs});
-      });
-    } else{
-      next(error);
+    if (error) next(error);
+    var pstat = stdout.match(/está\s([a-z]+)/);
+    if(pstat=== null) next(new Error("No se puede acceder a la impresora"));
+    else{
+      var ready;
+      if(pstat[1]==="deshabilitada") ready=false;
+      else ready=pstat[1];
+      var accept=!(stdout.match(/Rejecting\sJobs/));
     }
+
+    child.exec('lpq -P '+printer, function (error, stdout, stderr) {
+      console.log('jobs queue stdout: ' + stdout);
+      console.log('jobs queue stderr: ' + stderr);
+      if (error) next(error);
+      var jobstrings = stdout.match(/pi[\s]+[0-9]+[\s]+[^\s]+/gm);
+      var jobs={};
+      for(var i in jobstrings){
+        var jobparams = jobstrings[i].match(/pi[\s]+([0-9]+)[\s]+([^\s]+)/);
+        jobs[jobparams[1]]={fname: jobparams[2], stat: "Hola", lvl: false};
+      }
+      child.exec('lpstat -l -U pi '+printer, function (error, stdout, stderr) {
+        console.log('job status stdout: ' + stdout);
+        console.log('job status stderr: ' + stderr);
+        if (error) next(error);
+        for(var i in jobs){
+          var regex= new RegExp("\-"+i+".*\n(.*)")
+          var statline=stdout.match(regex);
+          if(statline){
+            jobs[i].stat = statline[1].match(/\:\s([a-z0-9\s]+)/i)[1];
+            var prog = statline[1].match(/([0-9]+)\%/);
+            if(prog) jobs[i].lvl = prog[1];
+            else jobs[i].lvl = false;
+          }else jobs[i].stat = "Unknown";
+        }
+        res.render("settings", {ready: ready, accept: accept, jobs: jobs});
+      });      
+    });
   });
 };
 

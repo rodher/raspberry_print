@@ -192,7 +192,10 @@ socket.on('queue', function (data){
 		}
 	});
 	for(var i in data.jobs){
-		$(".settingstable")
-		.append("<tr><td>"+data.jobs[i].fname +"</td><td>"+data.jobs[i].stat+"</td><td><progress value="+(data.jobs[i].lvl||0)+" max="100"></progress></td></tr>");
+		$(".settingstable").append("<tr>");
+		$(".settingstable").append("<td>"+data.jobs[i].fname +"</td>");
+		$(".settingstable").append("<td>"+data.jobs[i].stat+"</td>");
+		$(".settingstable").append("<td><progress value="+(data.jobs[i].lvl||0)+" max="100"></progress></td>");
+		$(".settingstable").append("</tr>");
 	}
 });

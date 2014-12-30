@@ -20,7 +20,7 @@ MAX_DAYS=30				# Máximo intervalo de días durante los que se almacena un archi
 fntCheckErrors()
 {	
 	FILE_LOG=$1;
-	if [ -n "`grep \"Error:\" ${FILE_LOG}`" ]; then
+	if [ -n "`grep \"Error\" ${FILE_LOG}`" ]; then
 		echo "Ha ocurrido un error en el anterior paso. Para más detalles consulta " ${FILE_LOG} >&2 ;
 		exit -1;
 	fi

@@ -62,7 +62,7 @@ exports.print = function(req, res, next) {
       print.setMaxListeners(0); // Evitamos warning de memory leak
 
       // Conectamos con el socket
-      req.io.on('connection', function (socket){
+      req.io.of('/print').on('connection', function (socket){
 
         // Enviamos información a través del socket
         print.stdout.on('data', function (chunk) {

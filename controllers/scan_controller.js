@@ -55,7 +55,7 @@ exports.scan = function(req,res,next){
 	var scan = child.spawn('./bin/scan.sh', [mode, fname.replace(/\s/g,"_")]);
 
 	// Conectamos con el socket
-	req.io.on('connection', function (socket){
+	req.io.of('/scan').on('connection', function (socket){
 		communication(socket, scan, mode, next);
 	});
 
@@ -85,7 +85,7 @@ exports.crop = function(req, res, next){
 	var scan = child.spawn('./bin/scan.sh', scanjob);
 
 	// Conectamos con el socket
-	req.io.on('connection', function (socket){
+	req.io.of('/scan/crop').on('connection', function (socket){
 		communication(socket, scan, "img", next);
 	});
 
@@ -116,7 +116,7 @@ exports.add = function(req, res, next){
 	scan = child.spawn('./bin/scan.sh', [fname.replace(/\s/g,"_")]);
 
 	// Conectamos con el socket
-	req.io.on('connection', function (socket){
+	req.io.of('/scan/add').on('connection', function (socket){
 		communication(socket, scan, "pdf", next);
 	});
 

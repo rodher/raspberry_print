@@ -183,3 +183,16 @@ socket.on('pstat', function (data){
 	if(data.accept) $("#acpt").html("Aceptando trabajos");
 	else $("#acpt").html("Rechazando trabajos");
 });
+
+socket.on('queue', function (data){
+	$(".settingstable tr").each(function(i){
+		if(i>0){
+			$(this.remove());
+			$(this).html("<td>Hola</td><td>Hola</td><td>Hola</td>");
+		}
+	});
+	for(var i in data.jobs){
+		$(".settingstable").append("<tr><td>"+data.jobs[i].fname +"</td><td>"+data.jobs[i].stat+
+						"</td><td><progress value="+(data.jobs[i].lvl||0)+" max="100"></progress></td></tr>");
+	}
+});

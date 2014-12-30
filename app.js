@@ -133,7 +133,7 @@ var scanbase = function scanbase(socket){
 // Socket para los ajustes de la impresora
 var settingsocket = io.of('/settings').on('connection', function (socket){
     //Repetimos envio periodicamente
-    setInterval(function(){
+    var ival = setInterval(function(){
         // Obtencion de estado de impresora
         child.exec('lpstat -p', function (error, stdout, stderr) {
             console.log('printer stat stdout: ' + stdout);
@@ -181,8 +181,10 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
                 }
             });
         });
-        console.log("Enviando estado");
-    },500);    
+    },500);
+    socket.on('disconnect', function(){
+        clearInterval(ival);
+    });    
 });
 
 module.exports = app;

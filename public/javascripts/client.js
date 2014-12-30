@@ -195,7 +195,7 @@ socket.on('queue', function (data){
 		$(".settingstable").append("<tr>");
 		$(".settingstable").append("<td>"+data.jobs[i].fname +"</td>");
 		$(".settingstable").append("<td>"+data.jobs[i].stat+"</td>");
-		$(".settingstable").append("<td><progress value="+(data.jobs[i].lvl||0)+" max="100"></progress></td>");
+		$(".settingstable").append('<td><progress value='+(data.jobs[i].lvl||0)+' max="100"></progress></td>');
 		$(".settingstable").append("</tr>");
 	}
 });

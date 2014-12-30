@@ -2,8 +2,8 @@ var child = require('child_process');	// Modulo para procesos de terminal
 var fs = require('fs');					// Modulo de archivos de sistema
 
 var s_dir = "scans/"; // Directorio donde se almacenan los escaneos
+var img_dir = "public/images/"; //Directorio donde se almacenan las imagenes publicas
 
-var jobs={}; // Trabajos pendientes: {close, fname, mode, pages, ival}
 
 // GET /scan/index
 exports.index = function(req, res, next) {
@@ -14,15 +14,11 @@ exports.index = function(req, res, next) {
 
 // POST /scan
 exports.scan = function(req,res,next){
-	
-	var id=Date.now(); // Creamos id para el trabajo
 
-	// Añadimos trabajo a la lista de trabajos pendientes
-    jobs[id]={close: false, fname: req.body.filename || String(id) , mode: req.body.scan_mode, pages: 1};
-    var ext;
+	var ext;
 
     // Determinamos la extension del archivo resultante
-	switch (jobs[id].mode){
+	switch (req.body.scan_mode){
 		case "img" :
 			ext=".jpg"
 			break;
@@ -35,7 +31,8 @@ exports.scan = function(req,res,next){
 			break;
 	}
 
-	var fname = req.body.filename;
+	var fname = req.body.filename || String(Date.now()); // Obtenemos el nombre
+
 	// Comprobamos si existe un archivo de igual nombre
   	if(fs.existsSync(s_dir+fname.replace(/\s/g,"_")+ext)){
 
@@ -46,87 +43,54 @@ exports.scan = function(req,res,next){
   			i++;
   			name=fname+"("+i+")";
   		}while(fs.existsSync(s_dir+name.replace(/\s/g,"_")+ext))
-  		jobs[id].fname=name;
   		fname = name;
   	}
 
+  	var mode;
+
+  	if(req.body.preview) mode="pre";
+  	else mode=req.body.scan_mode;
+
   	// Ejecutamos el comando de escaneado
-	var scan = child.spawn('./bin/scan.sh', [req.body.scan_mode, fname.replace(/\s/g,"_")]);
+	var scan = child.spawn('./bin/scan.sh', [mode, fname.replace(/\s/g,"_")]);
 
 	// Conectamos con el socket
 	req.io.on('connection', function (socket){
-		communication(socket, scan, req.body.scan_mode);
-
+		communication(socket, scan, mode, scan.pid, next);
 	});
 
-	// Enviamos la respuesta: "Archivo escaneandose"
-	res.render("scan/"+req.body.scan_mode, { fname: fname});
-
-
-
+	// Enviamos la respuesta y marcamos la conversacion con el pid
+	res.render("scan/"+mode, { fname: fname, jobid: scan.pid, pages: 1});
 }
 
-// GET /scan/result
-exports.result = function(req, res, next){
+// POST /scan/crop
+exports.crop = function(req, res, next){
 
-	// Creamos la funcion de comprobacion de trabajo finalizado
-	var funcion = function(){
-	    if(jobs[req.query.scanid].close){
+	var fname = req.body.fname;
 
-	    	clearInterval( jobs[req.query.scanid].ival); // Terminamos la comprobacion periodica
+	// Eliminamos la vista previa
+	fs.unlink(img_dir+fname.replace(/\s/g,"_")+"_pre.jpg", function (err) {
+	  if (err) next(err);
+	  else console.log("Vista previa de "+fname+" eliminada con exito");
+	});
 
-	    	// Enviamos respuestas distintas dependiendo del modo de escaneado
-			switch (jobs[req.query.scanid].mode){
-				case "img" :
-					res.render("scan/result", {	fname:jobs[req.query.scanid].fname+'.jpg',
-												scanid: req.query.scanid});
-					break;
+	// Preparamos los argumentos de scan
+	scanjob = [	req.body.left, 
+				req.body.top,
+				req.body.width, 
+				req.body.height, 
+				fname.replace(/\s/g,"_")];
 
-				case "pdf" :
-					res.render("scan/pdf", {scanid: req.query.scanid, 
-											pages: jobs[req.query.scanid].pages });
-					break;
+	// Ejecutamos el comando de escaneado
+	var scan = child.spawn('./bin/scan.sh', scanjob);
 
-				default :
-					break;
-			}
-	    }
-	};
+	// Conectamos con el socket
+	req.io.on('connection', function (socket){
+		communication(socket, scan, "img", scan.pid, next);
+	});
 
-	jobs[req.query.scanid].ival=setInterval(funcion,0); // Comprobamos periodicamente
-}
-
-// POST /scan/add
-exports.add = function(req, res, next){
-
-	jobs[req.body.scanid].close=false; 	// Volvemos a poner como falso el flag close
-	jobs[req.body.scanid].pages++;		// y aumentamos el numero de paginas
-
-	// Ejecuamos nuevamente el comando de escaneo
-	child.execFile('./bin/scan.sh', [jobs[req.body.scanid].fname.replace(/\s/g,"_")] ,
-	function (error, stdout, stderr) {
-      if(error!==null){
-        next(error);
-      }
-      console.log('scan stdout:');
-      console.log(stdout);
-      if(stderr){
-        console.log('scan stderr:');
-        console.log(stderr);
-      }
-	})
-	.on('close',function(code,signal){
-    	jobs[req.body.scanid].close=true; // Cuando se termina de ejecutar ponemos como verdadero el flag close
-  	});
-
-	// Enviamos respuesta: "Archivo escaneandose"
-	res.render("scan/sent", {sc_mode: jobs[req.body.scanid].mode, scanid: req.body.scanid});
-}
-
-// GET /scan/pdf/result
-exports.resultPDF = function(req, res, next){
-	res.render("scan/result", {	fname:jobs[req.query.scanid].fname+'.pdf',
-												scanid: req.query.scanid});
+	// Enviamos la respuesta y marcamos la conversacion con el pid
+	res.render("scan/img", { fname: fname, jobid: scan.pid});
 }
 
 // GET /scan/download
@@ -145,30 +109,46 @@ exports.download = function(req, res, next){
 	);
 }
 
-communication = function communication (socket, scan, mode) {
-    scan.stdout.on('data', function (chunk) {
+// POST /scan/add
+exports.add = function(req, res, next){
+	var fname = req.body.fname;		// Extraemos del body el nombre del archivo
+	var pages = ++req.body.pages;	// y el numero de paginas escaneadas, aumentandolo en 1
+	scan = child.spawn('./bin/scan.sh', [fname.replace(/\s/g,"_")]);
 
-      socket.emit('message', { msg: chunk.toString()});
+	// Conectamos con el socket
+	req.io.on('connection', function (socket){
+		communication(socket, scan, "pdf", scan.pid, next);
+	});
+
+	// Enviamos la respuesta y marcamos la conversacion con el pid
+	res.render("scan/pdf", { fname: fname, jobid: scan.pid, pages: pages});	
+}
+
+/* Funcion que implementa la comunicacion por sockets.
+	usa como parametros el socket creado, el child process, el modo de
+	escaneado y el pid del proceso para identificar el socket
+*/
+communication = function communication (socket, scan, mode, pid, next) {
+	// Enviamos la salida de datos como mensajes en el cliente
+    scan.stdout.on('data', function (chunk) {
+    	console.log(chunk.toString());
+      	socket.emit('message', { msg: chunk.toString(), jobid: pid});
     });
+    // Enviamos la salida de error, donde se imprime el progreso, como muestra del progreso
     scan.stderr.on('data', function (chunk) {
-    	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%/);
-    	if(progress) socket.emit('progress', { progress: progress[1] });
+    	console.log(chunk.toString());
+    	//Comprobamos que la salida es numerica
+    	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%/); 
+    	if(progress) socket.emit('progress', { progress: progress[1], jobid: pid });
     });
-  	scan.on('close',function(code){
-  		var evt = mode+"end";
-    	console.log("Trabajo terminado con codigo "+code);
-        if(code===0) socket.emit( evt, { success: true});
+    // Al cerrar avisamos de que el proceso ha terminado, con exito o no
+  	scan.on('exit',function(code){
+  		var evt = mode+"end"; // Determinamos evento del socket en funcion del formato de escaneo
+    	console.log("Escaneo terminado con codigo "+code);
+        if(code===0) socket.emit( evt, { success: true, jobid: pid});
         else{ 
-          socket.emit( evt, { success: false});
+          socket.emit( evt, { success: false, jobid: pid});
           next(new Error("Error de impresión"));
         }
   	});
-
-  	if(mode==="pdf"){
-	  	socket.on('add', function (data){
-	  		scan = child.spawn('./bin/scan.sh', [data.fname.replace(/\s/g,"_")]);
-	  		communication(this, scan, mode);
-	  	});
-  	}
-
 }

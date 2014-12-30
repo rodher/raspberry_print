@@ -1,14 +1,15 @@
 #!/bin/bash
 
-# Ejemplo de uso: scan.sh scanmode fname || scan.sh fname
+# Ejemplo de uso: scan.sh fname || scan.sh scanmode fname || scan.sh left top width height fname
 
 #########################
 #		CONSTANTES		#
 #########################
 
-SCAN_DIR='./scans'	# Directorio donde se almacenan los escaneos
-LOG_DIR='./log'		# Directorio donde se almacenan los logs
-MAX_DAYS=30			# Máximo intervalo de días durante los que se almacena un archivo en la aplicacion
+SCAN_DIR='./scans'			# Directorio donde se almacenan los escaneos
+LOG_DIR='./log'				# Directorio donde se almacenan los logs
+IMG_DIR='./public/images'	# Directorio donde se almacenan las imagenes estaticas
+MAX_DAYS=30					# Máximo intervalo de días durante los que se almacena un archivo en la aplicacion
 
 #########################
 #		FUNCIONES		#
@@ -39,12 +40,28 @@ fntAddPage()
 fntScan()
 {	
 	echo "Escaneando ${fname}"
-	scanimage -p --format=tiff --mode Color --resolution=300 > ${SCAN_DIR}/${fname}.tiff
-	echo "Convirtiendo a ${ext}"
-	convert ${SCAN_DIR}/${fname}.tiff  ${SCAN_DIR}/${fname}.${ext} &>> ${LOG_DIR}/scan.log
-	fntCheckErrors ${LOG_DIR}/scan.log
-	rm ${SCAN_DIR}/${fname}.tiff
+	scanimage -p -l ${left} -t ${top} -x ${width} -y ${height} --mode Color ${res} > ${SCAN_DIR}/${fname}.pnm
+}
 
+# Funcion para convertir a jpg
+fntJPG()
+{	
+	echo "Convirtiendo a jpg"
+	convert -quality 75 ${SCAN_DIR}/${fname}.pnm  ${SCAN_DIR}/${fname}.jpg &> ${LOG_DIR}/convertJPG.log
+	fntCheckErrors ${LOG_DIR}/convertJPG.log
+	rm ${SCAN_DIR}/${fname}.pnm
+}
+
+# Funcion para convertir a pdf
+fntPDF(){
+	echo "Convirtiendo a imagen"
+	convert -quality 50 ${SCAN_DIR}/${fname}.pnm  ${SCAN_DIR}/${fname}_tmp.jpg &> ${LOG_DIR}/convertJPG.log
+	fntCheckErrors ${LOG_DIR}/convertJPG.log
+	rm ${SCAN_DIR}/${fname}.pnm
+	echo "Convirtiendo a pdf"
+	convert -page A4 ${SCAN_DIR}/${fname}_tmp.jpg ${SCAN_DIR}/${fname}.pdf &> ${LOG_DIR}/convertPDF.log
+	fntCheckErrors ${LOG_DIR}/convertPDF.log
+	rm ${SCAN_DIR}/${fname}_tmp.jpg
 }
 
 #########################
@@ -56,27 +73,60 @@ find ${SCAN_DIR}/ -mtime +${MAX_DAYS} -delete # Borrado de archivos que llevan m
 # Comportamiento si solo se usa un parametro: Modo escanear y añadir pagina
 if [[ $# == 1 ]]; then
 	doc=$1
+	left=0
+	top=0
+	width="208.5"
+	height="295.5"
+	res="--resolution=300"
 	fname=$1_parcial
-	ext="pdf"
+
 	fntScan
+	fntPDF
 	fntAddPage
 
 # Comportamiento si se usan dos parametros: Modo escanear
 elif [[ $# == 2 ]]; then
 
-	fname=$2
+	left=0
+	top=0
+	width="208.5"
+	height="295.5"
+
+	if [[ "$1" == "pre" ]]; then
+		res="--preview=yes"
+		fname=$2_pre
+	else
+		res="--resolution=300"
+		fname=$2
+	fi 
+
+	fntScan
 
 	if [[ "$1" == "pdf" ]]; then
-		ext="pdf"
-
-	elif [[ "$1" == "img" ]]; then
-		ext="jpg"
+		fntPDF
+	elif [[ "$1" == "img" || "$1" == "pre" ]]; then
+		fntJPG
 	else
-		echo "Formato de archivo no admitido" >&2 
+		echo "Modo de escaneo no admitido" >&2 
 		exit 1
 	fi
 
+	if [[ "$1" == "pre" ]]; then
+		mv  ${SCAN_DIR}/${fname}.jpg ${IMG_DIR}/${fname}.jpg # Movemos resultado a las imagenes publicas
+	fi
+
+# Comportamiento si se usan cinco parametros: Modo recortar
+elif [[ $# == 5 ]]; then
+	
+	left=$1
+	top=$2
+	width=$3
+	height=$4
+	res="--resolution=300"
+	fname=$5
+
 	fntScan
+	fntJPG
 
 else
 	echo "Número de argumentos incorrecto" >&2

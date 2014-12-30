@@ -21,26 +21,23 @@ router.get('/ink',  printController.inklevels);
 //Rutas de escaneado
 router.get('/scan/index',  scanController.index);
 router.post('/scan',  scanController.scan);
-router.get('/scan/result', scanController.result);
-router.post('/scan/add', scanController.add); 
-router.get('/scan/pdf/result', scanController.resultPDF); 
+router.post('/scan/crop', scanController.crop); 
 router.get('/scan/download',  scanController.download);
+router.post('/scan/add', scanController.add);
 
 // Rutas de muestra de archivos
+router.get('/files', fileController.index);
 router.get('/print/files', fileController.listPrint);
 router.get('/print/show/:file', fileController.showPrint);
+router.get('/print/download/:file', fileController.downloadPrint);
+router.delete('/print/:file', fileController.destroyPrint);
 router.get('/scan/files', fileController.listScan);
 router.get('/scan/show/:file', fileController.showScan);
-router.get('/files', fileController.index);
+router.get('/scan/download/:file', fileController.downloadScan);
+router.delete('/scan/:file', fileController.destroyScan);
 
 // Ruta de ayuda
 router.get('/help', function(req, res, next){
-	req.io.on('connection', function (socket) {
-	  socket.emit('news', { hello: 'world', page: 'help' });
-	  socket.on('my other event', function (data) {
-	    console.log(data);
-	  });
-	});
 	res.render('help');
 });
 

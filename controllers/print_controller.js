@@ -39,12 +39,15 @@ exports.print = function(req, res, next) {
       next(err);
     }
 
-    var fname=files.archivo[0].originalFilename;
+    var fname=files.archivo[0].originalFilename;  // Extraemos nombre de archivo
+    var size=parseFloat(fields.psize[0]) || 28.5; // Extraemos tamaño de impresion; usamos por defecto 28.5 cm
+    size=Math.round(100*size/28.5);               // Convertimos tamaño de impresion en porcentaje sobre la pagina completa
 
     // Creamos el array de argumentos para el comando de impresion
     var printjob=[fields.mode[0], 
                   fields.page_mode[0], 
                   fields.page_interval[0],
+                  size.toString(),
                   fields.ncopy[0],
                   fname.replace(/\s/g,"_") ];
 
@@ -56,31 +59,35 @@ exports.print = function(req, res, next) {
 
       //Ejecutamos el comando de impresion
       var print = child.spawn('./bin/print.sh', printjob);
+      print.setMaxListeners(0); // Evitamos warning de memory leak
 
       // Conectamos con el socket
       req.io.on('connection', function (socket){
+
         // Enviamos información a través del socket
         print.stdout.on('data', function (chunk) {
-          var data = chunk.toString();
-          var progress = data.match(/[0-9]+/);
-          if(progress) socket.emit('progress', { progress: progress[0] });
-          else socket.emit('message', { msg: data});
+          var data = chunk.toString(); // Convertimos de Buffer a String
+          var progress = data.match(/[0-9]+/); // Comprobamos que se trata de progreso o no
+          if(progress) socket.emit('progress', { progress: progress[0], jobid: print.pid });
+          else socket.emit('message', { msg: data, jobid: print.pid});
+          console.log(data);
         });
 
+        // Avisamos del fin del proceso
         print.on('close',function (code){
-            if(code===0) socket.emit('printend', { success: true});
+            if(code===0) socket.emit('printend', { success: true, jobid: print.pid});
             else{ 
-              socket.emit('printend', { success: false});
+              socket.emit('printend', { success: false, jobid: print.pid});
               next(new Error("Error de impresión"));
             }
         });
       });
 
-
-      // Enviamos respuesta, el archivo esta preparandose para imprimir
+      // Enviamos respuesta, y marcamos la conversacion con el pid
       res.render("print/sent", {
-        msg: fname+" enviado con éxito. Preparando archivo para imprimir.",  
-      });     
+        msg: fname+" enviado con éxito. Preparando archivo para imprimir.",
+        jobid: print.pid  
+      });   
     } else{
       next(new Error('Formulario mal rellenado'));
     }
@@ -94,18 +101,19 @@ exports.inklevels = function(req,res, next){
   child.exec('ink -p usb', function (error, stdout, stderr) {
     console.log('ink stdout: ' + stdout);
     console.log('ink stderr: ' + stderr);
-    if (error !== null) {
-      next(error);
+    if (error !== null) next(error);
+    if(stdout.match(/Could\snot/)) next(new Error("No se pueden obtener niveles de tinta"));
+    else{
+      var inklevels ={};
+
+      // Rellenamos la informacion de nivel de los distintos colores
+      inklevels.cyan=stdout.match(/Cyan:[\s]+([0-9]+)%/)[1];
+      inklevels.magenta=stdout.match(/Magenta:[\s]+([0-9]+)%/)[1];
+      inklevels.yellow=stdout.match(/Yellow:[\s]+([0-9]+)%/)[1];
+      inklevels.black=stdout.match(/Photoblack:[\s]+([0-9]+)%/)[1]; 
+
+      res.render("ink",{inklevels: inklevels}); //Enviamos la respuesta
     }
-    var inklevels ={};
-
-    // Rellenamos la informacion de nivel de los distintos colores
-    inklevels.cyan=stdout.match(/Cyan:[\s]+([0-9]+)%/)[1];
-    inklevels.magenta=stdout.match(/Magenta:[\s]+([0-9]+)%/)[1];
-    inklevels.yellow=stdout.match(/Yellow:[\s]+([0-9]+)%/)[1];
-    inklevels.black=stdout.match(/Photoblack:[\s]+([0-9]+)%/)[1]; 
-
-    res.render("ink",{inklevels: inklevels}); //Enviamos la respuesta
   });
 
 };
@@ -113,7 +121,7 @@ exports.inklevels = function(req,res, next){
 validate =function(printjob){
 
   // No se valida si no hay ningun archivo subido
-  if(!printjob[4]){
+  if(!printjob[5]){
     return false;
   }
 

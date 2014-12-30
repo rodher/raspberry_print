@@ -5,6 +5,8 @@ var fs = require('fs');                 // Modulo de archivos de sistema
 var p_dir = "prints/";  // Directorio donde se almacenan las impresiones
 
 var printer = "EPSON_Stylus_DX7400"; // Impresora por defecto del sistema
+var prints=[];          // Pila de comandos a exportar
+exports.prints = prints;
 
 // GET /print
 exports.index = function(req, res, next) {
@@ -62,34 +64,10 @@ exports.print = function(req, res, next) {
       //Ejecutamos el comando de impresion
       var print = child.spawn('./bin/print.sh', printjob);
       print.setMaxListeners(0); // Evitamos warning de memory leak
+      prints.push(print);       // Añadimos el comando a la pila
 
-      // Conectamos con el socket
-      req.io.on('connection', function (socket){
-
-        // Enviamos información a través del socket
-        print.stdout.on('data', function (chunk) {
-          var data = chunk.toString(); // Convertimos de Buffer a String
-          var progress = data.match(/[0-9]+/); // Comprobamos que se trata de progreso o no
-          if(progress) socket.emit('progress', { progress: progress[0], jobid: print.pid });
-          else socket.emit('message', { msg: data, jobid: print.pid});
-          console.log(data);
-        });
-
-        // Avisamos del fin del proceso
-        print.on('close',function (code){
-            if(code===0) socket.emit('printend', { success: true, jobid: print.pid});
-            else{ 
-              socket.emit('printend', { success: false, jobid: print.pid});
-              next(new Error("Error de impresión"));
-            }
-        });
-      });
-
-      // Enviamos respuesta, y marcamos la conversacion con el pid
-      res.render("print/sent", {
-        msg: fname+" enviado con éxito. Preparando archivo para imprimir.",
-        jobid: print.pid  
-      });   
+      // Enviamos respuesta
+      res.render("print/sent", { msg: fname+" enviado con éxito. Preparando archivo para imprimir."});    
     } else{
       next(new Error('Formulario mal rellenado'));
     }

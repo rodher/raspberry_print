@@ -177,3 +177,9 @@ socket.on('preend', function (data) {
 		else $("#msg").html("Error al escanear");
 	}
 });
+
+socket.on('pstat', function (data){
+	$("#rdy").html(data.ready || "pausada");
+	if(data.accept) $("#acpt").html("Aceptando trabajos");
+	else $("#acpt").html("Rechazando trabajos");
+});

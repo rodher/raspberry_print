@@ -11,6 +11,7 @@ var routes = require('./routes/index');
 var prints = require('./controllers/print_controller').prints;
 var scans = require('./controllers/scan_controller').scans;
 var http = require('http');
+var child = require('child_process'); 
 
 var app = express();
 
@@ -128,5 +129,60 @@ var scanbase = function scanbase(socket){
         });
     }else socket.emit( 'pdfend', { success: false, id: socket.id});    
 };
+
+// Socket para los ajustes de la impresora
+var settingsocket = io.of('/settings').on('connection', function (socket){
+    //Repetimos envio periodicamente
+    setInterval(function(){
+        // Obtencion de estado de impresora
+        child.exec('lpstat -p', function (error, stdout, stderr) {
+            console.log('printer stat stdout: ' + stdout);
+            console.log('printer stat stderr: ' + stderr);
+            if (!error){
+                var pstat = stdout.match(/está\s([a-z]+)/); // Obtencion de estado de la actividad de la impresora
+                if(pstat !== null){
+                  var ready;
+                  if(pstat[1]==="deshabilitada") ready=false;
+                  else ready=pstat[1];
+                  var accept=!(stdout.match(/Rejecting\sJobs/)); // Si el comando devuelve "Rejecting Jobs", la impresora no acepta trabajos
+                  socket.emit('pstat', { ready: ready, accept: accept});
+                }
+            }
+        });
+
+        // Obtencion de lista de trabajos
+        child.exec('lpq', function (error, stdout, stderr) {
+            console.log('jobs queue stdout: ' + stdout);
+            console.log('jobs queue stderr: ' + stderr);
+            if (!error){
+                var jobstrings = stdout.match(/pi[\s]+[0-9]+[\s]+[^\s]+/gm); // Obtiene lineas con los trabajos en un array
+                var jobs={};
+                for(var i in jobstrings){
+                    var jobparams = jobstrings[i].match(/pi[\s]+([0-9]+)[\s]+([^\s]+)/); // Separa de cada trabajo el id y el nombre
+                    jobs[jobparams[1]]={fname: jobparams[2]};
+                }
+            }
+            // Obtencion del estado de cada trabajo
+            child.exec('lpstat -l -U pi', function (error, stdout, stderr) {
+                console.log('job status stdout: ' + stdout);
+                console.log('job status stderr: ' + stderr);
+                if (!error) {
+                    for(var i in jobs){
+                        var regex= new RegExp("\-"+i+".*\n(.*)")  // Crea una regexp distinta para cada trabajo
+                        var statline=stdout.match(regex);         // Extrae la informacion necesaria de cada trabajo
+                        if(statline){
+                            jobs[i].stat = statline[1].match(/\:\s([a-z0-9\s\-]+)/i)[1];  // Extrae el estado
+                            var prog = statline[1].match(/([0-9]+)\%/);                   // Extrae el progreso
+                            if(prog) jobs[i].lvl = prog[1];                               // Si se encuentra progreso, se extrae,
+                            else jobs[i].lvl = false;                                     // y si no se pone a false
+                        }else jobs[i].stat = "Unknown";
+                    }
+                    socket.emit('queue', { jobs: jobs});
+                }
+            });
+        });
+        console.log("Enviando estado");
+    },500);    
+});
 
 module.exports = app;

@@ -5,6 +5,7 @@ var fs = require('fs');                 // Modulo de archivos de sistema
 var p_dir = "prints/";  // Directorio donde se almacenan las impresiones
 
 var printer = "EPSON_Stylus_DX7400"; // Impresora por defecto del sistema
+
 var prints=[];          // Pila de comandos a exportar
 exports.prints = prints;
 

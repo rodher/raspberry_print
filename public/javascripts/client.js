@@ -1,3 +1,4 @@
+var id;
 var pages;
 
 var sizes ={full: "28.5", a5: "21", frame: "15", carnet: "3.2"};	// Array de tamaños de impresion
@@ -13,6 +14,7 @@ var sizes ={full: "28.5", a5: "21", frame: "15", carnet: "3.2"};	// Array de tam
 	7. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
 */
 $(document).ready(function() {
+	id = socket.io.engine.id;
 	pages=parseInt($("#pages").val());
 	$(".inkbar").each(function(){
 		if($(this).val()<=10) $(this).attr('id', 'emptybar');
@@ -96,7 +98,7 @@ function submitDelete(kind, file){
 	$("form[action='/"+kind+"/"+file+"?_method=DELETE']").submit();
 }
 var socket = io.connect('http://192.168.1.200:3000'); // Conectamos con el servidor
-var id = socket.io.engine.id;						  // Guardamos el id del socket
+
 
 
 /*	CALLBACKS DEL SOCKET

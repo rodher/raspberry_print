@@ -16,10 +16,7 @@
 			<tr>
 				<td><%= jobs[i].fname %></td>
 				<td><%= jobs[i].stat %></td>
-				<td>
-				<% if(jobs[i].lvl){ %>
-					<progress value="<%= jobs[i].lvl %>" max="100"></progress>
-				<% } %></td>
+				<td><progress value="<%= jobs[i].lvl || 0 %>" max="100"></progress></td>
 			</tr>
 		<% } %>
 	</table>

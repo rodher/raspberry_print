@@ -100,41 +100,44 @@ exports.inklevels = function(req,res, next){
 // GET /settings
 exports.settings= function(req,res, next){
 
+  // Obtencion de estado de impresora
   child.exec('lpstat -p', function (error, stdout, stderr) {
     console.log('printer stat stdout: ' + stdout);
     console.log('printer stat stderr: ' + stderr);
     if (error) next(error);
-    var pstat = stdout.match(/está\s([a-z]+)/);
+    var pstat = stdout.match(/está\s([a-z]+)/); // Obtencion de estado de la actividad de la impresora
     if(pstat=== null) next(new Error("No se puede acceder a la impresora"));
     else{
       var ready;
       if(pstat[1]==="deshabilitada") ready=false;
       else ready=pstat[1];
-      var accept=!(stdout.match(/Rejecting\sJobs/));
+      var accept=!(stdout.match(/Rejecting\sJobs/)); // Si el comando devuelve "Rejecting Jobs", la impresora no acepta trabajos
     }
 
+    // Obtencion de lista de trabajos
     child.exec('lpq', function (error, stdout, stderr) {
       console.log('jobs queue stdout: ' + stdout);
       console.log('jobs queue stderr: ' + stderr);
       if (error) next(error);
-      var jobstrings = stdout.match(/pi[\s]+[0-9]+[\s]+[^\s]+/gm);
+      var jobstrings = stdout.match(/pi[\s]+[0-9]+[\s]+[^\s]+/gm); // Obtiene lineas con los trabajos en un array
       var jobs={};
       for(var i in jobstrings){
-        var jobparams = jobstrings[i].match(/pi[\s]+([0-9]+)[\s]+([^\s]+)/);
+        var jobparams = jobstrings[i].match(/pi[\s]+([0-9]+)[\s]+([^\s]+)/); // Separa de cada trabajo el id y el nombre
         jobs[jobparams[1]]={fname: jobparams[2]};
       }
+      // Obtencion del estado de cada trabajo
       child.exec('lpstat -l -U pi', function (error, stdout, stderr) {
         console.log('job status stdout: ' + stdout);
         console.log('job status stderr: ' + stderr);
         if (error) next(error);
         for(var i in jobs){
-          var regex= new RegExp("\-"+i+".*\n(.*)")
-          var statline=stdout.match(regex);
+          var regex= new RegExp("\-"+i+".*\n(.*)")  // Crea una regexp distinta para cada trabajo
+          var statline=stdout.match(regex);         // Extrae la informacion necesaria de cada trabajo
           if(statline){
-            jobs[i].stat = statline[1].match(/\:\s([a-z0-9\s\-]+)/i)[1];
-            var prog = statline[1].match(/([0-9]+)\%/);
-            if(prog) jobs[i].lvl = prog[1];
-            else jobs[i].lvl = false;
+            jobs[i].stat = statline[1].match(/\:\s([a-z0-9\s\-]+)/i)[1];  // Extrae el estado
+            var prog = statline[1].match(/([0-9]+)\%/);                   // Extrae el progreso
+            if(prog) jobs[i].lvl = prog[1];                               // Si se encuentra progreso, se extrae,
+            else jobs[i].lvl = false;                                     // y si no se pone a false
           }else jobs[i].stat = "Unknown";
         }
         res.render("settings", {ready: ready, accept: accept, jobs: jobs});

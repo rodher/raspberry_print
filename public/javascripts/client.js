@@ -95,7 +95,7 @@ function toCms(pixels){
 function submitDelete(kind, file){
 	$("form[action='/"+kind+"/"+file+"?_method=DELETE']").submit();
 }
-var socket = io.connect('http://192.168.1.200:3000'); // Conectamos con el servidor
+var socket = io.connect($(location).attr('href')); // Conectamos con el servidor usando la ruta cliente
 
 
 

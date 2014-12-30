@@ -93,16 +93,16 @@ var printsocket = io.of('/print').on('connection', function (socket){
 });
 
 // Socket para el comando inicial del escaneado
-var scansocket = io.of('/scan').on('connection', scanbase );
+var scansocket = io.of('/scan').on('connection', function (socket){scanbase(socket)});
 
 // Socket para el comando de añadir pagina al escaneado
-var cropsocket = io.of('/scan/crop').on('connection', scanbase );
+var cropsocket = io.of('/scan/crop').on('connection', function (socket){scanbase(socket)});
 
 // Socket para el comando de añadir pagina al escaneado
-var addsocket = io.of('/scan/add').on('connection', scanbase );
+var addsocket = io.of('/scan/add').on('connection', function (socket){scanbase(socket)});
 
 // Funcion base para los sockets de todas las distintas fases del escaneo
-var scanbase =function(socket){
+var scanbase = function scanbase(socket){
 
     var scan = scans.pop(); //Extraemos comando
 

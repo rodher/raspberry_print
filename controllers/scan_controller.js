@@ -4,6 +4,9 @@ var fs = require('fs');					// Modulo de archivos de sistema
 var s_dir = "scans/"; // Directorio donde se almacenan los escaneos
 var img_dir = "public/images/"; //Directorio donde se almacenan las imagenes publicas
 
+var scans=[];          // Pila de comandos a exportar
+exports.scans = scans;
+
 
 // GET /scan/index
 exports.index = function(req, res, next) {
@@ -53,11 +56,8 @@ exports.scan = function(req,res,next){
 
   	// Ejecutamos el comando de escaneado
 	var scan = child.spawn('./bin/scan.sh', [mode, fname.replace(/\s/g,"_")]);
-
-	// Conectamos con el socket
-	req.io.of('/scan').on('connection', function (socket){
-		communication(socket, scan, mode, next);
-	});
+	scan.mode = mode; // Añadimos el modo de escaneado
+	scans.push(scan); // Añadimos el comando a la pila
 
 	// Enviamos la respuesta
 	res.render("scan/"+mode, { fname: fname, pages: 1});
@@ -83,11 +83,8 @@ exports.crop = function(req, res, next){
 
 	// Ejecutamos el comando de escaneado
 	var scan = child.spawn('./bin/scan.sh', scanjob);
-
-	// Conectamos con el socket
-	req.io.of('/scan/crop').on('connection', function (socket){
-		communication(socket, scan, "img", next);
-	});
+	scan.mode = "img"; // Añadimos el modo de escaneado
+	scans.push(scan); // Añadimos el comando a la pila
 
 	// Enviamos la respuesta
 	res.render("scan/img", { fname: fname});
@@ -114,41 +111,9 @@ exports.add = function(req, res, next){
 	var fname = req.body.fname;		// Extraemos del body el nombre del archivo
 	var pages = ++req.body.pages;	// y el numero de paginas escaneadas, aumentandolo en 1
 	scan = child.spawn('./bin/scan.sh', [fname.replace(/\s/g,"_")]);
-
-	// Conectamos con el socket
-	req.io.of('/scan/add').on('connection', function (socket){
-		communication(socket, scan, "pdf", next);
-	});
+	scan.mode = "pdf"; // Añadimos el modo de escaneado
+	scans.push(scan); // Añadimos el comando a la pila
 
 	// Enviamos la respuesta
 	res.render("scan/pdf", { fname: fname, pages: pages});	
-}
-
-/* Funcion que implementa la comunicacion por sockets.
-	usa como parametros el socket creado, el child process, y el modo de
-	escaneado
-*/
-communication = function communication (socket, scan, mode, next) {
-	// Enviamos la salida de datos como mensajes en el cliente
-    scan.stdout.on('data', function (chunk) {
-    	console.log(chunk.toString());
-      	socket.emit('message', { msg: chunk.toString(), id: socket.id});
-    });
-    // Enviamos la salida de error, donde se imprime el progreso, como muestra del progreso
-    scan.stderr.on('data', function (chunk) {
-    	console.log(chunk.toString());
-    	//Comprobamos que la salida es numerica
-    	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%/); 
-    	if(progress) socket.emit('progress', { progress: progress[1], id: socket.id });
-    });
-    // Al cerrar avisamos de que el proceso ha terminado, con exito o no
-  	scan.on('exit',function(code){
-  		var evt = mode+"end"; // Determinamos evento del socket en funcion del formato de escaneo
-    	console.log("Escaneo terminado con codigo "+code);
-        if(code===0) socket.emit( evt, { success: true, id: socket.id});
-        else{ 
-          socket.emit( evt, { success: false, id: socket.id});
-          next(new Error("Error de impresión"));
-        }
-  	});
 }

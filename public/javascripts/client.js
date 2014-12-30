@@ -146,7 +146,6 @@ socket.on('imgend', function (data) {
 socket.on('pdfend', function (data) {
 	if(data.id===socket.io.engine.id){
 		$("progress").hide(); // Ocultamos la barra de progreso
-		//pages++;			  // Aumentamos la cuenta de paginas escaneadas
 		if(data.success){
 			$("#msg").html(pages+(pages===1 ? " página escaneada" : " páginas escaneadas"));
 			$(".botones").show();	// Mostramos los botones de accion

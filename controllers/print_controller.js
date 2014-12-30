@@ -113,7 +113,7 @@ exports.settings= function(req,res, next){
       var accept=!(stdout.match(/Rejecting\sJobs/));
     }
 
-    child.exec('lpq -P '+printer, function (error, stdout, stderr) {
+    child.exec('lpq', function (error, stdout, stderr) {
       console.log('jobs queue stdout: ' + stdout);
       console.log('jobs queue stderr: ' + stderr);
       if (error) next(error);
@@ -123,7 +123,7 @@ exports.settings= function(req,res, next){
         var jobparams = jobstrings[i].match(/pi[\s]+([0-9]+)[\s]+([^\s]+)/);
         jobs[jobparams[1]]={fname: jobparams[2]};
       }
-      child.exec('lpstat -l -U pi '+printer, function (error, stdout, stderr) {
+      child.exec('lpstat -l -U pi', function (error, stdout, stderr) {
         console.log('job status stdout: ' + stdout);
         console.log('job status stderr: ' + stderr);
         if (error) next(error);

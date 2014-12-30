@@ -1,21 +1,18 @@
-var id;
 var pages;
 
 var sizes ={full: "28.5", a5: "21", frame: "15", carnet: "3.2"};	// Array de tamaños de impresion
 
 /*	Cuando el documento está cargado:
-	1. 	Guardamos el pid como id de nuestra conversacion
-	2.	Le damos el valor de las paginas escaneadas a pages
-	3. 	Comprobamos el nivel de tinta de cada color
+	1.	Le damos el valor de las paginas escaneadas a pages
+	2. 	Comprobamos el nivel de tinta de cada color
 		y si es menor que el 10% cambiamos el color
-	4.	Ocultamos los botones de escaneado de pdf
-	5. 	Ocultamos parte del formulario de impresion
-	6. 	Ocultamos la seleccion de area en scan/pre
-	7. 	Añadimos cambio automatico de la lista de tamaños de impresion al modificar la entrada de texto del tamaño
-	8. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
+	3.	Ocultamos los botones de escaneado de pdf
+	4. 	Ocultamos parte del formulario de impresion
+	5. 	Ocultamos la seleccion de area en scan/pre
+	6. 	Añadimos cambio automatico de la lista de tamaños de impresion al modificar la entrada de texto del tamaño
+	7. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
 */
 $(document).ready(function() {
-	id = parseInt($("#job").val()); 
 	pages=parseInt($("#pages").val());
 	$(".inkbar").each(function(){
 		if($(this).val()<=10) $(this).attr('id', 'emptybar');
@@ -99,16 +96,17 @@ function submitDelete(kind, file){
 	$("form[action='/"+kind+"/"+file+"?_method=DELETE']").submit();
 }
 var socket = io.connect('http://192.168.1.200:3000'); // Conectamos con el servidor
+var id = socket.io.engine.id;						  // Guardamos el id del socket
 
 
 /*	CALLBACKS DEL SOCKET
 	En todos ellos debemos comprobar si la conversacion esta marcada
-	con nuestro mismo PID para hacer caso al envio o no
+	con nuestro mismo id de socket para hacer caso al envio o no
 */
 
 // Callback de progreso
 socket.on('progress', function (data) {
-	if(data.jobid===id){
+	if(data.id===id){
 		$("progress").val(data.progress);
 		if(parseInt(data.progress)===parseInt($("progress").attr('max'))){ // Si llegamos al valor máximo
 			$("progress").removeAttr('value');							  // cambiamos la barra a estado 
@@ -118,14 +116,14 @@ socket.on('progress', function (data) {
 
 // Callback de mensajes
 socket.on('message', function (data) {
-	if(data.jobid===id){
+	if(data.id===id){
 		$("#msg").html(data.msg);
 	}
 });
 
 // Callback cuando la impresion finaliza
 socket.on('printend', function (data) {
-	if(data.jobid===id){
+	if(data.id===id){
 		$("progress").hide(); 							// Ocultamos la barra de progreso
 		if(data.success) $("#msg").html("Imprimiendo");	// Informamos si ha habido error o no
 		else $("#msg").html("Error al imprimir");
@@ -134,7 +132,7 @@ socket.on('printend', function (data) {
 
 // Callback cuando el escaneado de la imagen finaliza
 socket.on('imgend', function (data) {
-	if(data.jobid===id){
+	if(data.id===id){
 		$("progress").hide();	// Ocultamos la barra de progreso
 		if(data.success){		// Si ha habido exito descargamos el archivo
 			$("#msg").html("Descargando archivo");
@@ -146,7 +144,7 @@ socket.on('imgend', function (data) {
 
 // Callback cuando el escaneado del pdf finaliza
 socket.on('pdfend', function (data) {
-	if(data.jobid===id){
+	if(data.id===id){
 		$("progress").hide(); // Ocultamos la barra de progreso
 		//pages++;			  // Aumentamos la cuenta de paginas escaneadas
 		if(data.success){
@@ -159,7 +157,7 @@ socket.on('pdfend', function (data) {
 
 // Callback cuando el escaneado de la vista previa finaliza
 socket.on('preend', function (data) {
-	if(data.jobid===id){
+	if(data.id===id){
 		$("progress").hide();	// Ocultamos la barra de progreso
 		if(data.success){		// Si ha habido exito cargamos la imagen y preparamos la selección de área
 			$("#msg").html("Vista previa completada. Selecciona el área que quieres escanear.");

@@ -56,11 +56,11 @@ exports.scan = function(req,res,next){
 
 	// Conectamos con el socket
 	req.io.on('connection', function (socket){
-		communication(socket, scan, mode, scan.pid, next);
+		communication(socket, scan, mode, next);
 	});
 
-	// Enviamos la respuesta y marcamos la conversacion con el pid
-	res.render("scan/"+mode, { fname: fname, jobid: scan.pid, pages: 1});
+	// Enviamos la respuesta
+	res.render("scan/"+mode, { fname: fname, pages: 1});
 }
 
 // POST /scan/crop
@@ -86,11 +86,11 @@ exports.crop = function(req, res, next){
 
 	// Conectamos con el socket
 	req.io.on('connection', function (socket){
-		communication(socket, scan, "img", scan.pid, next);
+		communication(socket, scan, "img", next);
 	});
 
-	// Enviamos la respuesta y marcamos la conversacion con el pid
-	res.render("scan/img", { fname: fname, jobid: scan.pid});
+	// Enviamos la respuesta
+	res.render("scan/img", { fname: fname});
 }
 
 // GET /scan/download
@@ -117,37 +117,37 @@ exports.add = function(req, res, next){
 
 	// Conectamos con el socket
 	req.io.on('connection', function (socket){
-		communication(socket, scan, "pdf", scan.pid, next);
+		communication(socket, scan, "pdf", next);
 	});
 
-	// Enviamos la respuesta y marcamos la conversacion con el pid
-	res.render("scan/pdf", { fname: fname, jobid: scan.pid, pages: pages});	
+	// Enviamos la respuesta
+	res.render("scan/pdf", { fname: fname, pages: pages});	
 }
 
 /* Funcion que implementa la comunicacion por sockets.
-	usa como parametros el socket creado, el child process, el modo de
-	escaneado y el pid del proceso para identificar el socket
+	usa como parametros el socket creado, el child process, y el modo de
+	escaneado
 */
-communication = function communication (socket, scan, mode, pid, next) {
+communication = function communication (socket, scan, mode, next) {
 	// Enviamos la salida de datos como mensajes en el cliente
     scan.stdout.on('data', function (chunk) {
     	console.log(chunk.toString());
-      	socket.emit('message', { msg: chunk.toString(), jobid: pid});
+      	socket.emit('message', { msg: chunk.toString(), id: socket.id});
     });
     // Enviamos la salida de error, donde se imprime el progreso, como muestra del progreso
     scan.stderr.on('data', function (chunk) {
     	console.log(chunk.toString());
     	//Comprobamos que la salida es numerica
     	var progress = chunk.toString().match(/^Progress: ([0-9]+)\.[0-9]%/); 
-    	if(progress) socket.emit('progress', { progress: progress[1], jobid: pid });
+    	if(progress) socket.emit('progress', { progress: progress[1], id: socket.id });
     });
     // Al cerrar avisamos de que el proceso ha terminado, con exito o no
   	scan.on('exit',function(code){
   		var evt = mode+"end"; // Determinamos evento del socket en funcion del formato de escaneo
     	console.log("Escaneo terminado con codigo "+code);
-        if(code===0) socket.emit( evt, { success: true, jobid: pid});
+        if(code===0) socket.emit( evt, { success: true, id: socket.id});
         else{ 
-          socket.emit( evt, { success: false, jobid: pid});
+          socket.emit( evt, { success: false, id: socket.id});
           next(new Error("Error de impresión"));
         }
   	});

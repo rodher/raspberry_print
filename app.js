@@ -92,8 +92,17 @@ var printsocket = io.of('/print').on('connection', function (socket){
     } else socket.emit('printend', { success: false, id: socket.id});
 });
 
-// Socket para el comando de escaneado
-var scansocket = io.of('/scan/add').on('connection', function (socket){
+// Socket para el comando inicial del escaneado
+var scansocket = io.of('/scan').on('connection', scanbase );
+
+// Socket para el comando de añadir pagina al escaneado
+var cropsocket = io.of('/scan/crop').on('connection', scanbase );
+
+// Socket para el comando de añadir pagina al escaneado
+var addsocket = io.of('/scan/add').on('connection', scanbase );
+
+// Funcion base para los sockets de todas las distintas fases del escaneo
+var scanbase =function(socket){
 
     var scan = scans.pop(); //Extraemos comando
 
@@ -117,7 +126,7 @@ var scansocket = io.of('/scan/add').on('connection', function (socket){
             if(code===0) socket.emit( evt, { success: true, id: socket.id});
             else socket.emit( evt, { success: false, id: socket.id});
         });
-    }else socket.emit( 'pdfend', { success: false, id: socket.id});
-});
+    }else socket.emit( 'pdfend', { success: false, id: socket.id});    
+};
 
 module.exports = app;

@@ -1,4 +1,3 @@
-var id;
 var pages;
 
 var sizes ={full: "28.5", a5: "21", frame: "15", carnet: "3.2"};	// Array de tamaños de impresion
@@ -14,7 +13,6 @@ var sizes ={full: "28.5", a5: "21", frame: "15", carnet: "3.2"};	// Array de tam
 	7. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
 */
 $(document).ready(function() {
-	id = socket.io.engine.id;
 	pages=parseInt($("#pages").val());
 	$(".inkbar").each(function(){
 		if($(this).val()<=10) $(this).attr('id', 'emptybar');
@@ -108,7 +106,7 @@ var socket = io.connect('http://192.168.1.200:3000'); // Conectamos con el servi
 
 // Callback de progreso
 socket.on('progress', function (data) {
-	if(data.id===id){
+	if(data.id===socket.io.engine.id){
 		$("progress").val(data.progress);
 		if(parseInt(data.progress)===parseInt($("progress").attr('max'))){ // Si llegamos al valor máximo
 			$("progress").removeAttr('value');							  // cambiamos la barra a estado 
@@ -118,14 +116,14 @@ socket.on('progress', function (data) {
 
 // Callback de mensajes
 socket.on('message', function (data) {
-	if(data.id===id){
+	if(data.id===socket.io.engine.id){
 		$("#msg").html(data.msg);
 	}
 });
 
 // Callback cuando la impresion finaliza
 socket.on('printend', function (data) {
-	if(data.id===id){
+	if(data.id===socket.io.engine.id){
 		$("progress").hide(); 							// Ocultamos la barra de progreso
 		if(data.success) $("#msg").html("Imprimiendo");	// Informamos si ha habido error o no
 		else $("#msg").html("Error al imprimir");
@@ -134,7 +132,7 @@ socket.on('printend', function (data) {
 
 // Callback cuando el escaneado de la imagen finaliza
 socket.on('imgend', function (data) {
-	if(data.id===id){
+	if(data.id===socket.io.engine.id){
 		$("progress").hide();	// Ocultamos la barra de progreso
 		if(data.success){		// Si ha habido exito descargamos el archivo
 			$("#msg").html("Descargando archivo");
@@ -146,7 +144,7 @@ socket.on('imgend', function (data) {
 
 // Callback cuando el escaneado del pdf finaliza
 socket.on('pdfend', function (data) {
-	if(data.id===id){
+	if(data.id===socket.io.engine.id){
 		$("progress").hide(); // Ocultamos la barra de progreso
 		//pages++;			  // Aumentamos la cuenta de paginas escaneadas
 		if(data.success){
@@ -159,7 +157,7 @@ socket.on('pdfend', function (data) {
 
 // Callback cuando el escaneado de la vista previa finaliza
 socket.on('preend', function (data) {
-	if(data.id===id){
+	if(data.id===socket.io.engine.id){
 		$("progress").hide();	// Ocultamos la barra de progreso
 		if(data.success){		// Si ha habido exito cargamos la imagen y preparamos la selección de área
 			$("#msg").html("Vista previa completada. Selecciona el área que quieres escanear.");

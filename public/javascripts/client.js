@@ -186,10 +186,11 @@ socket.on('preend', function (data) {
 
 socket.on('pstat', function (data){
 
-	$("#togglerdy").off("click");
-	$("#togglerdy").on("click",function(){ togrdy(data.ready&&true)});
-	$("#toggleacpt").off("click");
-	$("#toggleacpt").on("click",function(){ togacpt(data.accept)});
+	$("#togglerdy").removeAttr("onclick");
+	$("#toggleacpt").removeAttr("onclick");
+
+	$("#togglerdy").off("click").click(togrdy(data.ready&&true));
+	$("#toggleacpt").off("click").click(togacpt(data.accept));
 
 	$("#rdy").html(data.ready || "pausada");
 	if(data.ready) $("#togglerdy").html("Pausar Impresora");

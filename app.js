@@ -166,7 +166,7 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
                         var statline=stdout.match(regex);         // Extrae la informacion necesaria de cada trabajo
                         if(statline){
                             var stat = statline[1].match(/\:\s([a-z0-9\s\-]+)/i)[1];      // Extrae el estado
-                            if(stat === "job-hold-until-specified") stat = "Retenido";    // Renombramos estado en caso de
+                            if(stat === "job-hold-until-specified") stat = "Pausado";    // Renombramos estado en caso de
                             jobs[i].stat = stat;                                          // estar retenido
                             
                             var prog = statline[1].match(/([0-9]+)\%/);                   // Extrae el progreso

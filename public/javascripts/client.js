@@ -2,18 +2,24 @@ var pages;
 
 var sizes ={full: "28.5", a5: "21", frame: "15", carnet: "3.2"};	// Array de tamaños de impresion
 
+var rdy;	// Flags de estado de la impresora
+var acpt;
+
 /*	Cuando el documento está cargado:
 	1.	Le damos el valor de las paginas escaneadas a pages
-	2. 	Comprobamos el nivel de tinta de cada color
+	2.	Damos valor a los flags rdy y acpt
+	3. 	Comprobamos el nivel de tinta de cada color
 		y si es menor que el 10% cambiamos el color
-	3.	Ocultamos los botones de escaneado de pdf
-	4. 	Ocultamos parte del formulario de impresion
-	5. 	Ocultamos la seleccion de area en scan/pre
-	6. 	Añadimos cambio automatico de la lista de tamaños de impresion al modificar la entrada de texto del tamaño
-	7. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
+	4.	Ocultamos los botones de escaneado de pdf
+	5. 	Ocultamos parte del formulario de impresion
+	6. 	Ocultamos la seleccion de area en scan/pre
+	7. 	Añadimos cambio automatico de la lista de tamaños de impresion al modificar la entrada de texto del tamaño
+	8. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
 */
 $(document).ready(function() {
 	pages=parseInt($("#pages").val());
+	rdy = !($("#rdy").html()==="pausada");
+	acpt = ($("#acpt").html()==="Aceptando trabajos");
 	$(".inkbar").each(function(){
 		if($(this).val()<=10) $(this).attr('id', 'emptybar');
 	});
@@ -179,9 +185,22 @@ socket.on('preend', function (data) {
 });
 
 socket.on('pstat', function (data){
-	$("#rdy").html(data.ready || "pausada");
-	if(data.accept) $("#acpt").html("Aceptando trabajos");
-	else $("#acpt").html("Rechazando trabajos");
+
+	rdy = data.ready;
+	acpt = data.accept;
+
+	$("#rdy").html(rdy || "pausada");
+	if(rdy) $("#togglerdy").html("Pausar Impresora");
+	else $("#togglerdy").html("Reanudar Impresora");
+
+	if(acpt){ 
+		$("#acpt").html("Aceptando trabajos");
+		$("#toggleacpt").html("Rechazar trabajos");
+	}
+	else{
+		$("#acpt").html("Rechazando trabajos");
+		$("#toggleacpt").html("Aceptar trabajos");
+	}
 });
 
 socket.on('queue', function (data){
@@ -195,7 +214,7 @@ socket.on('queue', function (data){
 		var hbtn = data.jobs[i].stat==="Pausado" ? "Liberar Trabajo" : "Pausar Trabajo";
 		$("#pqueue").append('<tr><td>'+data.jobs[i].fname +'</td><td>'+data.jobs[i].stat+'</td>'
 			+'<td><progress value='+(data.jobs[i].lvl||0)+' max="100"></progress></td>'
-			+'<td><button id="hold'+i+'" type="button">'+hbtn+'</button>'
-			+'<button id="rm"'+i+' type="button">Cancelar Trabajo</button></td></tr>');
+			+'<td><button type="button" onclick="toghold('+i+','+data.jobs[i].stat+')">'+hbtn+'</button>'
+			+'<button type="button" onclick="cancel('+i+')" >Cancelar Trabajo</button></td></tr>');
 	}
 });

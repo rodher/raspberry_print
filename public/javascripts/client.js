@@ -105,6 +105,14 @@ function togacpt(acpt){
 	console.log("Impresora acepta trabajos? -> "+acpt);
 }
 
+function toghold(id, hold){
+	console.log("Trabajo con id "+id+" esta pausado? -> "+hold);
+}
+
+function cancel(id){
+	console.log("Cancelar trabajo "+id);
+}
+
 /*	CALLBACKS DEL SOCKET
 	En todos ellos debemos comprobar si la conversacion esta marcada
 	con nuestro mismo id de socket para hacer caso al envio o no

@@ -193,9 +193,9 @@ socket.on('queue', function (data){
 	});
 	for(var i in data.jobs){
 		var hbtn = data.jobs[i].stat==="Retenido" ? "Liberar Trabajo" : "Retener Trabajo";
-		$("#pqueue").append('<tr><td>'+data.jobs[i].fname +'</td><td>'+data.jobs[i].stat+'</td>');
-		$("#pqueue").append('<td><progress value='+(data.jobs[i].lvl||0)+' max="100"></progress></td>');
-		$("#pqueue").append('<td><button id="hold'+i+'" type="button">'+hbtn+'</button>');
-		$("#pqueue").append('<button id="rm"'+i+' type="button">Cancelar Trabajo</button></td></tr>');
+		$("#pqueue").append('<tr><td>'+data.jobs[i].fname +'</td><td>'+data.jobs[i].stat+'</td>'
+			+'<td><progress value='+(data.jobs[i].lvl||0)+' max="100"></progress></td>'
+			+'<td><button id="hold'+i+'" type="button">'+hbtn+'</button>'
+			+'<button id="rm"'+i+' type="button">Cancelar Trabajo</button></td></tr>');
 	}
 });

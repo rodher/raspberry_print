@@ -214,7 +214,7 @@ socket.on('queue', function (data){
 		var hbtn = data.jobs[i].stat==="Pausado" ? "Liberar Trabajo" : "Pausar Trabajo";
 		$("#pqueue").append('<tr><td>'+data.jobs[i].fname +'</td><td>'+data.jobs[i].stat+'</td>'
 			+'<td><progress value='+(data.jobs[i].lvl||0)+' max="100"></progress></td>'
-			+'<td><button type="button" onclick="toghold("'+i+'","'+data.jobs[i].stat+'")">'+hbtn+'</button>'
-			+'<button type="button" onclick="cancel("'+i+'")" >Cancelar Trabajo</button></td></tr>');
+			+'<td><button type="button" onclick="toghold('+i+',\''+data.jobs[i].stat+'\')">'+hbtn+'</button>'
+			+'<button type="button" onclick="cancel('+i+')" >Cancelar Trabajo</button></td></tr>');
 	}
 });

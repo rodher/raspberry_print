@@ -113,6 +113,10 @@ function cancel(id){
 	console.log("Cancelar trabajo "+id);
 }
 
+function cancelAll(){
+	console.log("Cancelar todos los trabajos";
+}
+
 /*	CALLBACKS DEL SOCKET
 	En todos ellos debemos comprobar si la conversacion esta marcada
 	con nuestro mismo id de socket para hacer caso al envio o no

@@ -1,10 +1,20 @@
 <h2>Ajustes de Impresión</h2>
 
 <h3>EPSON Stylus DX7400</h3>
-<u>Estado:</u> <span id="rdy"><%= ready || "pausada" %></span>
-<button id="togglerdy" type="button"><%= ready ? "Pausar Impresora" : "Reanudar Impresora" %></button><br>
-<u>Cola de impresión:</u> <span id="acpt"><%= accept ? "Aceptando trabajos" : "Rechazando trabajos" %></span>
-<button id="toggleacpt" type="button"><%= accept ? "Rechazar trabajos" : "Aceptar trabajos" %></button>
+<table>
+	<tr>
+		<td><u>Estado:</u> </td>
+		<td><span id="rdy"><%= ready || "pausada" %></span></td>
+		<td><button id="togglerdy" type="button"><%= ready ? "Pausar Impresora" : "Reanudar Impresora" %></button></td>
+	</tr>
+	<tr>
+		<td><u>Cola de impresión:</u> </td>
+		<td><span id="acpt"><%= accept ? "Aceptando trabajos" : "Rechazando trabajos" %></span></td>
+		<td><button id="toggleacpt" type="button">
+			<%= accept ? "Rechazar trabajos" : "Aceptar trabajos" %>
+		</button></td>
+	</tr>
+</table>
 <hr />
 <h3>Cola de impresión</h3>
 <table class="settingstable">

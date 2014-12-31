@@ -136,7 +136,8 @@ var scanbase = function scanbase(socket){
 var settingsocket = io.of('/settings').on('connection', function (socket){
     //Repetimos envio periodicamente
     var ival = setInterval(function(){
-        // Obtencion de estado de impresora
+
+        // Obtencion de enable/disable
         child.exec('lpstat -p', function (error, stdout, stderr) {
             if (!error){
                 var pstat = stdout.match(/está\s([a-z]+)/); // Obtencion de estado de la actividad de la impresora
@@ -144,9 +145,16 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
                   var ready;
                   if(pstat[1]==="deshabilitada") ready=false;
                   else ready=pstat[1];
-                  var accept=!(stdout.match(/Rejecting\sJobs/)); // Si el comando devuelve "Rejecting Jobs", la impresora no acepta trabajos
-                  socket.emit('pstat', { ready: ready, accept: accept});
+                  socket.emit('pstat', { ready: ready});
                 }
+            }
+        });
+
+        // Obtencion de accepting/rejecting
+        child.exec('lpstat -a', function (error, stdout, stderr) {
+            if (!error){
+                var accept=stdout.match(/aceptando/); // Si el comando devuelve "aceptando", la impresora acepta trabajos
+                socket.emit('pacpt', {accept: accept});
             }
         });
 

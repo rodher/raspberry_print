@@ -199,14 +199,19 @@ socket.on('preend', function (data) {
 socket.on('pstat', function (data){
 
 	$("#togglerdy").removeAttr("onclick");
-	$("#toggleacpt").removeAttr("onclick");
 
 	$("#togglerdy").off("click").click( function(){togrdy(data.ready&&true)});
-	$("#toggleacpt").off("click").click( function(){togacpt(data.accept)});
 
 	$("#rdy").html(data.ready || "pausada");
 	if(data.ready) $("#togglerdy").html("Pausar Impresora");
 	else $("#togglerdy").html("Reanudar Impresora");
+});
+
+socket.on('pacpt', function (data){
+
+	$("#toggleacpt").removeAttr("onclick");
+
+	$("#toggleacpt").off("click").click( function(){togacpt(data.accept)});
 
 	if(data.accept){ 
 		$("#acpt").html("Aceptando trabajos");

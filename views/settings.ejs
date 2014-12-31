@@ -1,8 +1,10 @@
 <h2>Ajustes de Impresión</h2>
 
 <h3>EPSON Stylus DX7400</h3>
-<u>Estado:</u> <div style="display:inline" id="rdy"><%= ready || "pausada" %></div><br>
-<u>Cola de impresión:</u> <div style="display:inline" id="acpt"><%= accept ? "Aceptando trabajos" : "Rechazando trabajos" %></div>
+<u>Estado:</u> <span id="rdy"><%= ready || "pausada" %></span>
+<button id="togglerdy" type="button"><%= ready ? "Pausar Impresora" : "Reanudar Impresora" %></button><br>
+<u>Cola de impresión:</u> <span id="acpt"><%= accept ? "Aceptando trabajos" : "Rechazando trabajos" %></span>
+<button id="toggleacpt" type="button"><%= accept ? "Rechazar trabajos" : "Aceptar trabajos" %></button>
 <hr />
 <h3>Cola de impresión</h3>
 <table class="settingstable">
@@ -11,12 +13,17 @@
 			<td>Nombre</td>
 			<td>Estado</td>
 			<td>Progreso</td>
+			<td>Opciones</td>
 		</tr>
 		<% for(var i in jobs){ %>
 			<tr>
 				<td><%= jobs[i].fname %></td>
 				<td><%= jobs[i].stat %></td>
 				<td><progress value="<%= jobs[i].lvl || 0 %>" max="100"></progress></td>
+				<td><button id=<%= "hold"+i %> type="button">
+				<%= jobs[i].stat==="Retenido" ? "Liberar Trabajo" : "Retener Trabajo" %></button>
+				<button id=<%= "rm"+i %> type="button">Cancelar Trabajo</button>
+				</td>
 			</tr>
 		<% } %>
 	</tbody>

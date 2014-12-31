@@ -97,7 +97,13 @@ function submitDelete(kind, file){
 }
 var socket = io.connect($(location).attr('href')); // Conectamos con el servidor usando la ruta cliente
 
+function togrdy(rdy){
+	console.log("Impresora preparada? -> "+rdy);
+}
 
+function togacpt(acpt){
+	console.log("Impresora acepta trabajos? -> "+acpt);
+}
 
 /*	CALLBACKS DEL SOCKET
 	En todos ellos debemos comprobar si la conversacion esta marcada

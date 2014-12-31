@@ -143,8 +143,10 @@ socket.on('message', function (data) {
 socket.on('printend', function (data) {
 	if(data.id===socket.io.engine.id){
 		$("progress").hide(); 							// Ocultamos la barra de progreso
-		if(data.success) $("#msg").html("Imprimiendo");	// Informamos si ha habido error o no
-		else $("#msg").html("Error al imprimir");
+		if(data.success){ 
+			$("#msg").html("Imprimiendo");	// Informamos si ha habido error o no
+			window.location.replace("http://192.168.1.200:3000/settings") // Redirigimos a ajustes
+		}else $("#msg").html("Error al imprimir");
 	}
 });
 

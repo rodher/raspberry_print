@@ -98,23 +98,23 @@ function submitDelete(kind, file){
 var socket = io.connect($(location).attr('href')); // Conectamos con el servidor usando la ruta cliente
 
 function togrdy(rdy){
-	console.log("Impresora preparada? -> "+rdy);
+	socket.emit('togrdy', {ready: rdy});
 }
 
 function togacpt(acpt){
-	console.log("Impresora acepta trabajos? -> "+acpt);
+	socket.emit('togacpt', {accept: acpt});
 }
 
 function toghold(id, hold){
-	console.log("Trabajo con id "+id+" esta pausado? -> "+hold);
+	socket.emit('toghold', {id: id, hold: hold});
 }
 
 function cancel(id){
-	console.log("Cancelar trabajo "+id);
+	socket.emit('cancel', {id: id});
 }
 
 function cancelAll(){
-	console.log("Cancelar todos los trabajos";
+	socket.emit('cancelAll');
 }
 
 /*	CALLBACKS DEL SOCKET

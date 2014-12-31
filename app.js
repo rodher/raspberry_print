@@ -11,7 +11,9 @@ var routes = require('./routes/index');
 var prints = require('./controllers/print_controller').prints;
 var scans = require('./controllers/scan_controller').scans;
 var http = require('http');
-var child = require('child_process'); 
+var child = require('child_process');
+
+var printer = "EPSON_Stylus_DX7400"; // Impresora por defecto del sistema 
 
 var app = express();
 
@@ -180,6 +182,63 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
         });
         console.log("Enviando por socket "+socket.id);
     },500);
+
+    socket.on('togrdy', function (data){
+        if(data.ready){
+            child.exec('cupsdisable '+printer, function (error, stdout, stderr) {
+                console.log(stdout);
+                console.log(stderr);
+            });
+        }else{
+            child.exec('cupsenable '+printer, function (error, stdout, stderr) {
+                console.log(stdout);
+                console.log(stderr);
+            });
+        }
+    });
+
+    socket.on('togacpt', function (data){
+        if(data.accept){
+            child.exec('cupsreject '+printer, function (error, stdout, stderr) {
+                console.log(stdout);
+                console.log(stderr);
+            });
+        }else{
+            child.exec('cupsaccept '+printer, function (error, stdout, stderr) {
+                console.log(stdout);
+                console.log(stderr);
+            });
+        }
+    });
+
+    socket.on('toghold', function (data){
+        if(data.hold){
+            child.exec('lp -i '+data.id+' -H resume', function (error, stdout, stderr) {
+                console.log(stdout);
+                console.log(stderr);
+            });
+        }else{
+            child.exec('lp -i '+data.id+' -H hold', function (error, stdout, stderr) {
+                console.log(stdout);
+                console.log(stderr);
+            });
+        }
+    });
+
+    socket.on('cancel', function (data){
+        child.exec('lprm '+data.id, function (error, stdout, stderr) {
+            console.log(stdout);
+            console.log(stderr);
+        });
+    });
+
+    socket.on('cancelAll', function (){
+        child.exec('lprm -', function (error, stdout, stderr) {
+            console.log(stdout);
+            console.log(stderr);
+        });
+    });
+
     socket.on('disconnect', function(){
         clearInterval(ival);
     });    

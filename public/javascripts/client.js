@@ -186,8 +186,8 @@ socket.on('preend', function (data) {
 
 socket.on('pstat', function (data){
 
-	$("#togglerdy").on("click",togrdy(data.ready&&true));
-	$("#toggleacpt").on("click",togacpt(data.accept));
+	$("#togglerdy").on("click",function(){ togrdy(data.ready&&true)});
+	$("#toggleacpt").on("click",function(){ togacpt(data.accept)});
 
 	$("#rdy").html(data.ready || "pausada");
 	if(data.ready) $("#togglerdy").html("Pausar Impresora");

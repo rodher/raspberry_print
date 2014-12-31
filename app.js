@@ -136,8 +136,6 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
     var ival = setInterval(function(){
         // Obtencion de estado de impresora
         child.exec('lpstat -p', function (error, stdout, stderr) {
-            console.log('printer stat stdout: ' + stdout);
-            console.log('printer stat stderr: ' + stderr);
             if (!error){
                 var pstat = stdout.match(/está\s([a-z]+)/); // Obtencion de estado de la actividad de la impresora
                 if(pstat !== null){
@@ -152,8 +150,6 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
 
         // Obtencion de lista de trabajos
         child.exec('lpq', function (error, stdout, stderr) {
-            console.log('jobs queue stdout: ' + stdout);
-            console.log('jobs queue stderr: ' + stderr);
             if (!error){
                 var jobstrings = stdout.match(/pi[\s]+[0-9]+[\s]+[^\s]+/gm); // Obtiene lineas con los trabajos en un array
                 var jobs={};
@@ -164,8 +160,6 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
             }
             // Obtencion del estado de cada trabajo
             child.exec('lpstat -l -U pi', function (error, stdout, stderr) {
-                console.log('job status stdout: ' + stdout);
-                console.log('job status stderr: ' + stderr);
                 if (!error) {
                     for(var i in jobs){
                         var regex= new RegExp("\-"+i+".*\n(.*)")  // Crea una regexp distinta para cada trabajo
@@ -181,6 +175,7 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
                 }
             });
         });
+        console.log("Enviando por socket "+socket.id);
     },500);
     socket.on('disconnect', function(){
         clearInterval(ival);

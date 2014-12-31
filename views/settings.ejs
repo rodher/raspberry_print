@@ -5,8 +5,8 @@
 <u>Cola de impresión:</u> <div style="display:inline" id="acpt"><%= accept ? "Aceptando trabajos" : "Rechazando trabajos" %></div>
 <hr />
 <h3>Cola de impresión</h3>
-<div id=pqueue >
-	<table class="settingstable">
+<table class="settingstable">
+	<tbody id=pqueue>
 		<tr>
 			<td>Nombre</td>
 			<td>Estado</td>
@@ -19,8 +19,8 @@
 				<td><progress value="<%= jobs[i].lvl || 0 %>" max="100"></progress></td>
 			</tr>
 		<% } %>
-	</table>
-</div>
+	</tbody>
+</table>
 <br>
 <br>
 <a href="/"> Inicio</a>

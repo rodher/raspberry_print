@@ -185,17 +185,14 @@ socket.on('pstat', function (data){
 });
 
 socket.on('queue', function (data){
-	$(".settingstable tr").each(function(i){
+	
+	$("#pqueue tr").each(function(i){
 		if(i>0){
 			$(this.remove());
-			$(this).html("<td>Hola</td><td>Hola</td><td>Hola</td>");
 		}
 	});
 	for(var i in data.jobs){
-		$(".settingstable").append("<tr>");
-		$(".settingstable").append("<td>"+data.jobs[i].fname +"</td>");
-		$(".settingstable").append("<td>"+data.jobs[i].stat+"</td>");
-		$(".settingstable").append('<td><progress value='+(data.jobs[i].lvl||0)+' max="100"></progress></td>');
-		$(".settingstable").append("</tr>");
+		$("#pqueue").append('<tr><td>'+data.jobs[i].fname +'</td><td>'+data.jobs[i].stat+
+			'</td><td><progress value='+(data.jobs[i].lvl||0)+' max="100"></progress></td></tr>');
 	}
 });

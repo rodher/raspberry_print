@@ -101,57 +101,74 @@ exports.inklevels = function(req,res, next){
 // GET /settings
 exports.settings= function(req,res, next){
 
-  // Obtencion de enable/disable
-  child.exec('lpstat -p', function (error, stdout, stderr) {
-    console.log('printer stat stdout: ' + stdout);
-    console.log('printer stat stderr: ' + stderr);
-    if (error) next(error);
-    var pstat = stdout.match(/está\s([a-z]+)/); // Obtencion de estado de la actividad de la impresora
-    if(pstat=== null) next(new Error("No se puede acceder a la impresora"));
+  //Ejecutamos comando de comprobacion de niveles de tinta
+  child.exec('ink -p usb', function (error, stdout, stderr) {
+
+    console.log('ink stdout: ' + stdout);
+    console.log('ink stderr: ' + stderr);
+    if (error !== null) next(error);
+    if(stdout.match(/Could\snot/)) next(new Error("No se pueden obtener niveles de tinta"));
     else{
-      var ready;
-      if(pstat[1]==="deshabilitada") ready=false;
-      else ready=pstat[1];
+      var inklevels ={};
+
+      // Rellenamos la informacion de nivel de los distintos colores
+      inklevels.cyan=stdout.match(/Cyan:[\s]+([0-9]+)%/)[1];
+      inklevels.magenta=stdout.match(/Magenta:[\s]+([0-9]+)%/)[1];
+      inklevels.yellow=stdout.match(/Yellow:[\s]+([0-9]+)%/)[1];
+      inklevels.black=stdout.match(/Photoblack:[\s]+([0-9]+)%/)[1];
     }
-    
-    // Obtencion de accepting/rejecting
-    child.exec('lpstat -a', function (error, stdout, stderr) {
+    // Obtencion de enable/disable
+    child.exec('lpstat -p', function (error, stdout, stderr) {
       console.log('printer stat stdout: ' + stdout);
       console.log('printer stat stderr: ' + stderr);
       if (error) next(error);
-      var accept=stdout.match(/aceptando/); // Si el comando devuelve "aceptando", la impresora acepta trabajos
+      var pstat = stdout.match(/está\s([a-z]+)/); // Obtencion de estado de la actividad de la impresora
+      if(pstat=== null) next(new Error("No se puede acceder a la impresora"));
+      else{
+        var ready;
+        if(pstat[1]==="deshabilitada") ready=false;
+        else ready=pstat[1];
+      }
 
-      // Obtencion de lista de trabajos
-      child.exec('lpq', function (error, stdout, stderr) {
-        console.log('jobs queue stdout: ' + stdout);
-        console.log('jobs queue stderr: ' + stderr);
+      // Obtencion de accepting/rejecting
+      child.exec('lpstat -a', function (error, stdout, stderr) {
+        console.log('printer stat stdout: ' + stdout);
+        console.log('printer stat stderr: ' + stderr);
         if (error) next(error);
-        var jobstrings = stdout.match(/pi[\s]+[0-9]+[\s]+[^\s]+/gm); // Obtiene lineas con los trabajos en un array
-        var jobs={};
-        for(var i in jobstrings){
-          var jobparams = jobstrings[i].match(/pi[\s]+([0-9]+)[\s]+([^\s]+)/); // Separa de cada trabajo el id y el nombre
-          jobs[jobparams[1]]={fname: jobparams[2]};
-        }
+        var accept=stdout.match(/aceptando/); // Si el comando devuelve "aceptando", la impresora acepta trabajos
 
-        // Obtencion del estado de cada trabajo
-        child.exec('lpstat -l -U pi', function (error, stdout, stderr) {
-          console.log('job status stdout: ' + stdout);
-          console.log('job status stderr: ' + stderr);
+        // Obtencion de lista de trabajos
+        child.exec('lpq', function (error, stdout, stderr) {
+          console.log('jobs queue stdout: ' + stdout);
+          console.log('jobs queue stderr: ' + stderr);
           if (error) next(error);
-          for(var i in jobs){
-            var regex= new RegExp("\-"+i+".*\n(.*)")  // Crea una regexp distinta para cada trabajo
-            var statline=stdout.match(regex);         // Extrae la informacion necesaria de cada trabajo
-            if(statline){
-              var stat = statline[1].match(/\:\s([a-z0-9\s\-]+)/i)[1];      // Extrae el estado
-              if(stat === "job-hold-until-specified") stat = "Pausado";    // Renombramos estado en caso de estar retenido
-              jobs[i].stat = stat;
-              var prog = statline[1].match(/([0-9]+)\%/);                   // Extrae el progreso
-              if(prog) jobs[i].lvl = prog[1];                               // Si se encuentra progreso, se extrae,
-              else jobs[i].lvl = false;                                     // y si no se pone a false
-            }else jobs[i].stat = "Unknown";
+          var jobstrings = stdout.match(/pi[\s]+[0-9]+[\s]+[^\s]+/gm); // Obtiene lineas con los trabajos en un array
+          var jobs={};
+          for(var i in jobstrings){
+            var jobparams = jobstrings[i].match(/pi[\s]+([0-9]+)[\s]+([^\s]+)/); // Separa de cada trabajo el id y el nombre
+            jobs[jobparams[1]]={fname: jobparams[2]};
           }
-          res.render("settings", {ready: ready, accept: accept, jobs: jobs});
-        });      
+
+          // Obtencion del estado de cada trabajo
+          child.exec('lpstat -l -U pi', function (error, stdout, stderr) {
+            console.log('job status stdout: ' + stdout);
+            console.log('job status stderr: ' + stderr);
+            if (error) next(error);
+            for(var i in jobs){
+              var regex= new RegExp("\-"+i+".*\n(.*)")  // Crea una regexp distinta para cada trabajo
+              var statline=stdout.match(regex);         // Extrae la informacion necesaria de cada trabajo
+              if(statline){
+                var stat = statline[1].match(/\:\s([a-z0-9\s\-]+)/i)[1];      // Extrae el estado
+                if(stat === "job-hold-until-specified") stat = "Pausado";    // Renombramos estado en caso de estar retenido
+                jobs[i].stat = stat;
+                var prog = statline[1].match(/([0-9]+)\%/);                   // Extrae el progreso
+                if(prog) jobs[i].lvl = prog[1];                               // Si se encuentra progreso, se extrae,
+                else jobs[i].lvl = false;                                     // y si no se pone a false
+              }else jobs[i].stat = "Unknown";
+            }
+            res.render("settings", {ready: ready, accept: accept, jobs: jobs, inklevels: inklevels});
+          });      
+        });
       });
     });
   });

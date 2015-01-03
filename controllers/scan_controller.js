@@ -54,13 +54,13 @@ exports.scan = function(req,res,next){
   	if(req.body.preview) mode="pre";
   	else mode=req.body.scan_mode;
 
-  	// Ejecutamos el comando de escaneado
+	// Enviamos la respuesta
+	res.render("scan/"+mode, { fname: fname, pages: 1});
+
+	// Ejecutamos el comando de escaneado
 	var scan = child.spawn('./bin/scan.sh', [mode, fname.replace(/\s/g,"_")]);
 	scan.mode = mode; // Añadimos el modo de escaneado
 	scans.push(scan); // Añadimos el comando a la pila
-
-	// Enviamos la respuesta
-	res.render("scan/"+mode, { fname: fname, pages: 1});
 }
 
 // POST /scan/crop
@@ -81,13 +81,13 @@ exports.crop = function(req, res, next){
 				req.body.height, 
 				fname.replace(/\s/g,"_")];
 
+	// Enviamos la respuesta
+	res.render("scan/img", { fname: fname});
+
 	// Ejecutamos el comando de escaneado
 	var scan = child.spawn('./bin/scan.sh', scanjob);
 	scan.mode = "img"; // Añadimos el modo de escaneado
 	scans.push(scan); // Añadimos el comando a la pila
-
-	// Enviamos la respuesta
-	res.render("scan/img", { fname: fname});
 }
 
 // GET /scan/download
@@ -110,10 +110,12 @@ exports.download = function(req, res, next){
 exports.add = function(req, res, next){
 	var fname = req.body.fname;		// Extraemos del body el nombre del archivo
 	var pages = ++req.body.pages;	// y el numero de paginas escaneadas, aumentandolo en 1
-	scan = child.spawn('./bin/scan.sh', [fname.replace(/\s/g,"_")]);
-	scan.mode = "pdf"; // Añadimos el modo de escaneado
-	scans.push(scan); // Añadimos el comando a la pila
 
 	// Enviamos la respuesta
-	res.render("scan/pdf", { fname: fname, pages: pages});	
+	res.render("scan/pdf", { fname: fname, pages: pages});
+	
+	// Ejecutamos el comando de escaneado
+	var scan = child.spawn('./bin/scan.sh', [fname.replace(/\s/g,"_")]);
+	scan.mode = "pdf"; // Añadimos el modo de escaneado
+	scans.push(scan); // Añadimos el comando a la pila	
 }

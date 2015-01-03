@@ -9,8 +9,9 @@ var sizes ={full: "28.5", a5: "21", frame: "15", carnet: "3.2"};	// Array de tam
 	3.	Ocultamos los botones de escaneado de pdf
 	4. 	Ocultamos parte del formulario de impresion
 	5. 	Ocultamos la seleccion de area en scan/pre
-	6. 	Añadimos cambio automatico de la lista de tamaños de impresion al modificar la entrada de texto del tamaño
-	7. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
+	6. 	Ocultamos el link de Inicio mientras haya impresiones o escaneos en proceso
+	7. 	Añadimos cambio automatico de la lista de tamaños de impresion al modificar la entrada de texto del tamaño
+	8. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
 */
 $(document).ready(function() {
 	pages=parseInt($("#pages").val());
@@ -20,6 +21,7 @@ $(document).ready(function() {
 	$(".botones").hide();
 	$(".printhid").hide();
 	$("#crop").hide();
+	$("#back").hide();
 	var fsize = function(){$("#sizelist").val("custom");};
 	$("#size").change(fsize);
 	$("#size").keydown(fsize);
@@ -42,6 +44,7 @@ function add(){
 // Funcion onclick del botón de Descarga de scan/pdf.ejs
 function download() {
 	$(".botones").hide();					// Ocultamos botones de accion
+	$("#back").show(); 						// Mostramos el link de Inicio
 	$("#msg").html("Descargando archivo");	// Cambiamos el mensaje
 	$("#pdfscan").submit();					// Enviamos formulario
 }
@@ -95,9 +98,35 @@ function toCms(pixels){
 function submitDelete(kind, file){
 	$("form[action='/"+kind+"/"+file+"?_method=DELETE']").submit();
 }
+
 var socket = io.connect($(location).attr('href')); // Conectamos con el servidor usando la ruta cliente
 
+///////////////FUNCIONES QUE EMITEN A TRAVES DEL SOCKET///////////////////
 
+// Funcion onclick de Pausar/Reanudar impresora
+function togrdy(rdy){
+	socket.emit('togrdy', {ready: rdy});
+}
+
+// Funcion onclick de Aceptar/Rechazar Trabajos
+function togacpt(acpt){
+	socket.emit('togacpt', {accept: acpt});
+}
+
+// Funcion onclick de Liberar/Pausar Trabajo
+function toghold(id, hold){
+	socket.emit('toghold', {id: id, hold: hold});
+}
+
+// Funcion onclick de Cancelar trabajo
+function cancel(id){
+	socket.emit('cancel', {id: id});
+}
+
+// Funcion onclick de Cancelar todos los trabajos
+function cancelAll(){
+	socket.emit('cancelAll');
+}
 
 /*	CALLBACKS DEL SOCKET
 	En todos ellos debemos comprobar si la conversacion esta marcada
@@ -125,13 +154,19 @@ socket.on('message', function (data) {
 socket.on('printend', function (data) {
 	if(data.id===socket.io.engine.id){
 		$("progress").hide(); 							// Ocultamos la barra de progreso
-		if(data.success) $("#msg").html("Imprimiendo");	// Informamos si ha habido error o no
-		else $("#msg").html("Error al imprimir");
+		if(data.success){ 
+			$("#msg").html("Imprimiendo");	// Informamos si ha habido error o no
+			window.location.replace("/settings#printjobs") // Redirigimos a ajustes
+		}else{ 
+			$("#msg").html('Error al imprimir. Dirígete al <a href="/help#problemas">Solucionador de problemas</a>.');
+			$("#back").show(); // Mostramos el link de Inicio
+		}
 	}
 });
 
 // Callback cuando el escaneado de la imagen finaliza
 socket.on('imgend', function (data) {
+	$("#back").show(); // Mostramos el link de Inicio
 	if(data.id===socket.io.engine.id){
 		$("progress").hide();	// Ocultamos la barra de progreso
 		if(data.success){		// Si ha habido exito descargamos el archivo
@@ -175,5 +210,52 @@ socket.on('preend', function (data) {
 			$("#crop").show();
 		} 
 		else $("#msg").html("Error al escanear");
+	}
+});
+
+// Callback al envio del estado de la impresora
+socket.on('pstat', function (data){
+
+	$("#togglerdy").removeAttr("onclick"); // Eliminamos el onclick original del boton
+
+	$("#togglerdy").off("click").click( function(){togrdy(data.ready&&true)}); //Cambiamos el parametro de la funcion onclick
+
+	$("#rdy").html(data.ready || "pausada");					// Cambiamos la informacion y el nombre del boton
+	if(data.ready) $("#togglerdy").html("Pausar Impresora");
+	else $("#togglerdy").html("Reanudar Impresora");
+});
+
+// Callback al envio de la aceptacion de trabajos
+socket.on('pacpt', function (data){
+
+	$("#toggleacpt").removeAttr("onclick"); // Eliminamos el onclick original del boton
+
+	$("#toggleacpt").off("click").click( function(){togacpt(data.accept)}); //Cambiamos el parametro de la funcion onclick
+
+	if(data.accept){ 
+		$("#acpt").html("Aceptando trabajos");			// Cambiamos la informacion y el nombre del boton
+		$("#toggleacpt").html("Rechazar trabajos");
+	}
+	else{
+		$("#acpt").html("Rechazando trabajos");
+		$("#toggleacpt").html("Aceptar trabajos");
+	}
+});
+
+// Calback al envio de la cola de trabajos
+socket.on('queue', function (data){
+	
+	$("#pqueue tr").each(function(i){	// Borra la tabla actual, dejando solo la fila de encabezado
+		if(i>0){
+			$(this.remove());
+		}
+	});
+	for(var i in data.jobs){										// El bucle itera tantas veces como trabajos haya en la cola
+		var flag = data.jobs[i].stat==="Pausado";					// Determina si el trabajo esta liberado o pausado
+		var hbtn =  flag ? "Liberar Trabajo" : "Pausar Trabajo";
+		$("#pqueue").append('<tr><td>'+data.jobs[i].fname +'</td><td>'+data.jobs[i].stat+'</td>'	// Rellena la columna con
+			+'<td><progress value='+(data.jobs[i].lvl||0)+' max="100"></progress></td>'				// cada celda y con las
+			+'<td><button type="button" onclick="toghold('+i+','+flag+')">'+hbtn+'</button>'		// funciones onclick
+			+'<button type="button" onclick="cancel('+i+')" >Cancelar Trabajo</button></td></tr>');
 	}
 });

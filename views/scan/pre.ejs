@@ -6,7 +6,7 @@
 <div id="crop">
 	<img id="imagen" src="" width="417" height="591" alt="Vista previa"><br>
 	<input type="button" value="Cancelar selección" onclick="cancelSelection()">
-	<form method='post' action='/scan/crop'>
+	<form method='post' action='/scan/crop' style="display: inline">
 		<input type="hidden" name="left" value="0" />
 		<input type="hidden" name="top" value="0" />
 		<input type="hidden" name="width" value="208.5"/>
@@ -15,6 +15,3 @@
 		<input type="submit" value="Escanear" name="commit" />
 	</form>	
 </div>
-
-<br>
-<a href="/"> Inicio</a>

@@ -22,6 +22,10 @@ Pasos para desplegar la aplicación:
     
     Añade impresora en 192.168.1.200:631
     
+    sudo lpadmin -d EPSON_Stylus_DX7400
+    
+    lpadmin -d EPSON_Stylus_DX7400
+    
     
     sudo aptitude update
     

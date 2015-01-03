@@ -70,7 +70,7 @@ app.use(function(err, req, res, next) {
     });
 });
 
-// Implementacion de los sockets
+/////////////////////////////////// IMPLEMENTACION DE LOS SOCKETS //////////////////////////////////////
 
 // Socket para el comando de impresión
 var printsocket = io.of('/print').on('connection', function (socket){
@@ -144,7 +144,7 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
                 var pstat = stdout.match(/está\s([a-z]+)/); // Obtencion de estado de la actividad de la impresora
                 if(pstat !== null){
                   var ready;
-                  if(pstat[1]==="deshabilitada") ready=false;
+                  if(pstat[1]==="deshabilitada") ready=false; // Deshabilitada = pausada
                   else ready=pstat[1];
                   socket.emit('pstat', { ready: ready});
                 }
@@ -189,9 +189,9 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
                 }
             });
         });
-        console.log("Enviando por socket "+socket.id);
     },500);
 
+    // Socket de respuesta a Pausar/Reanudar impresora
     socket.on('togrdy', function (data){
         if(data.ready){
             child.exec('cupsdisable '+printer, function (error, stdout, stderr) {
@@ -206,6 +206,7 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
         }
     });
 
+    // Socket de respuesta a Aceptar/Rechazar trabajos
     socket.on('togacpt', function (data){
         if(data.accept){
             child.exec('cupsreject '+printer, function (error, stdout, stderr) {
@@ -220,6 +221,7 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
         }
     });
 
+    // Socket de respuesta a Pausar/Reanudar trabajo i
     socket.on('toghold', function (data){
         if(data.hold){
             child.exec('lp -i '+data.id+' -H resume', function (error, stdout, stderr) {
@@ -234,6 +236,7 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
         }
     });
 
+    // Socket de respuesta a cancelar trabajo i
     socket.on('cancel', function (data){
         child.exec('lprm '+data.id, function (error, stdout, stderr) {
             console.log(stdout);
@@ -241,6 +244,7 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
         });
     });
 
+    // Socket de respuesta a cancelar todos los trabajos
     socket.on('cancelAll', function (){
         child.exec('lprm -', function (error, stdout, stderr) {
             console.log(stdout);
@@ -248,6 +252,7 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
         });
     });
 
+    // Al desconectarnos debemos detener el envio periodico
     socket.on('disconnect', function(){
         clearInterval(ival);
     });    

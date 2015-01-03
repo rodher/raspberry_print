@@ -4,7 +4,7 @@ var fs = require('fs');					// Modulo de archivos de sistema
 var s_dir = "scans/"; // Directorio donde se almacenan los escaneos
 var img_dir = "public/images/"; //Directorio donde se almacenan las imagenes publicas
 
-var scans=[];          // Pila de comandos a exportar
+var scans=[];          // Pila de argumentos del comando a exportar
 exports.scans = scans;
 
 
@@ -12,7 +12,6 @@ exports.scans = scans;
 exports.index = function(req, res, next) {
 
   res.render("scan/index");
-
 };
 
 // POST /scan
@@ -54,13 +53,11 @@ exports.scan = function(req,res,next){
   	if(req.body.preview) mode="pre";
   	else mode=req.body.scan_mode;
 
+  	var scanjob = [mode, fname.replace(/\s/g,"_")]; // Creamos el array de argumentos
+  	scans.push({scanjob : scanjob, mode : mode});	// Añadimos los argumentos a la pila junto con el modo de escaneado
+
 	// Enviamos la respuesta
 	res.render("scan/"+mode, { fname: fname, pages: 1});
-
-	// Ejecutamos el comando de escaneado
-	var scan = child.spawn('./bin/scan.sh', [mode, fname.replace(/\s/g,"_")]);
-	scan.mode = mode; // Añadimos el modo de escaneado
-	scans.push(scan); // Añadimos el comando a la pila
 }
 
 // POST /scan/crop
@@ -75,19 +72,16 @@ exports.crop = function(req, res, next){
 	});
 
 	// Preparamos los argumentos de scan
-	scanjob = [	req.body.left, 
+	var scanjob = [	req.body.left, 
 				req.body.top,
 				req.body.width, 
 				req.body.height, 
 				fname.replace(/\s/g,"_")];
 
+  	scans.push({scanjob : scanjob, mode : "img"});	// Añadimos los argumentos a la pila junto con el modo de escaneado
+
 	// Enviamos la respuesta
 	res.render("scan/img", { fname: fname});
-
-	// Ejecutamos el comando de escaneado
-	var scan = child.spawn('./bin/scan.sh', scanjob);
-	scan.mode = "img"; // Añadimos el modo de escaneado
-	scans.push(scan); // Añadimos el comando a la pila
 }
 
 // GET /scan/download
@@ -111,11 +105,9 @@ exports.add = function(req, res, next){
 	var fname = req.body.fname;		// Extraemos del body el nombre del archivo
 	var pages = ++req.body.pages;	// y el numero de paginas escaneadas, aumentandolo en 1
 
+  	var scanjob = [fname.replace(/\s/g,"_")]; // Creamos el array de argumentos
+  	scans.push({scanjob : scanjob, mode : "pdf"});	// Añadimos los argumentos a la pila junto con el modo de escaneado	
+
 	// Enviamos la respuesta
 	res.render("scan/pdf", { fname: fname, pages: pages});
-	
-	// Ejecutamos el comando de escaneado
-	var scan = child.spawn('./bin/scan.sh', [fname.replace(/\s/g,"_")]);
-	scan.mode = "pdf"; // Añadimos el modo de escaneado
-	scans.push(scan); // Añadimos el comando a la pila	
 }

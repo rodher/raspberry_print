@@ -11,6 +11,9 @@ var routes = require('./routes/index');
 var prints = require('./controllers/print_controller').prints;
 var scans = require('./controllers/scan_controller').scans;
 var http = require('http');
+var child = require('child_process');
+
+var printer = "EPSON_Stylus_DX7400"; // Impresora por defecto del sistema 
 
 var app = express();
 
@@ -67,7 +70,7 @@ app.use(function(err, req, res, next) {
     });
 });
 
-// Implementacion de los sockets
+/////////////////////////////////// IMPLEMENTACION DE LOS SOCKETS //////////////////////////////////////
 
 // Socket para el comando de impresión
 var printsocket = io.of('/print').on('connection', function (socket){
@@ -77,6 +80,7 @@ var printsocket = io.of('/print').on('connection', function (socket){
     if(print){
         // Enviamos información a través del socket
         print.stdout.on('data', function (chunk) {
+          console.log(data);
           var data = chunk.toString(); // Convertimos de Buffer a String
           var progress = data.match(/[0-9]+/); // Comprobamos que se trata de progreso o no
           if(progress) socket.emit('progress', { progress: progress[0], id: socket.id });
@@ -128,5 +132,130 @@ var scanbase = function scanbase(socket){
         });
     }else socket.emit( 'pdfend', { success: false, id: socket.id});    
 };
+
+// Socket para los ajustes de la impresora
+var settingsocket = io.of('/settings').on('connection', function (socket){
+    //Repetimos envio periodicamente
+    var ival = setInterval(function(){
+
+        // Obtencion de enable/disable
+        child.exec('lpstat -p', function (error, stdout, stderr) {
+            if (!error){
+                var pstat = stdout.match(/está\s([a-z]+)/); // Obtencion de estado de la actividad de la impresora
+                if(pstat !== null){
+                  var ready;
+                  if(pstat[1]==="deshabilitada") ready=false; // Deshabilitada = pausada
+                  else ready=pstat[1];
+                  socket.emit('pstat', { ready: ready});
+                }
+            }
+        });
+
+        // Obtencion de accepting/rejecting
+        child.exec('lpstat -a', function (error, stdout, stderr) {
+            if (!error){
+                var accept=stdout.match(/aceptando/); // Si el comando devuelve "aceptando", la impresora acepta trabajos
+                socket.emit('pacpt', {accept: accept});
+            }
+        });
+
+        // Obtencion de lista de trabajos
+        child.exec('lpq', function (error, stdout, stderr) {
+            if (!error){
+                var jobstrings = stdout.match(/root[\s]+[0-9]+[\s]+[^\s]+/gm); // Obtiene lineas con los trabajos en un array
+                var jobs={};
+                for(var i in jobstrings){
+                    var jobparams = jobstrings[i].match(/root[\s]+([0-9]+)[\s]+([^\s]+)/); // Separa de cada trabajo el id y el nombre
+                    jobs[jobparams[1]]={fname: jobparams[2]};
+                }
+            }
+            // Obtencion del estado de cada trabajo
+            child.exec('lpstat -l', function (error, stdout, stderr) {
+                if (!error) {
+                    for(var i in jobs){
+                        var regex= new RegExp("\-"+i+".*\n(.*)")  // Crea una regexp distinta para cada trabajo
+                        var statline=stdout.match(regex);         // Extrae la informacion necesaria de cada trabajo
+                        if(statline && statline[1].match(/\:\s([a-z0-9\s\-]+)/i)){
+                            var stat = statline[1].match(/\:\s([a-z0-9\s\-]+)/i)[1];      // Extrae el estado
+                            if(stat === "job-hold-until-specified") stat = "Pausado";    // Renombramos estado en caso de
+                            jobs[i].stat = stat;                                          // estar retenido
+                            
+                            var prog = statline[1].match(/([0-9]+)\%/);                   // Extrae el progreso
+                            if(prog) jobs[i].lvl = prog[1];                               // Si se encuentra progreso, se extrae,
+                            else jobs[i].lvl = false;                                     // y si no se pone a false
+                        }else jobs[i].stat = "Unknown";
+                    }
+                    socket.emit('queue', { jobs: jobs});
+                }
+            });
+        });
+    },500);
+
+    // Socket de respuesta a Pausar/Reanudar impresora
+    socket.on('togrdy', function (data){
+        if(data.ready){
+            child.exec('cupsdisable '+printer, function (error, stdout, stderr) {
+                console.log(stdout);
+                console.log(stderr);
+            });
+        }else{
+            child.exec('cupsenable '+printer, function (error, stdout, stderr) {
+                console.log(stdout);
+                console.log(stderr);
+            });
+        }
+    });
+
+    // Socket de respuesta a Aceptar/Rechazar trabajos
+    socket.on('togacpt', function (data){
+        if(data.accept){
+            child.exec('cupsreject '+printer, function (error, stdout, stderr) {
+                console.log(stdout);
+                console.log(stderr);
+            });
+        }else{
+            child.exec('cupsaccept '+printer, function (error, stdout, stderr) {
+                console.log(stdout);
+                console.log(stderr);
+            });
+        }
+    });
+
+    // Socket de respuesta a Pausar/Reanudar trabajo i
+    socket.on('toghold', function (data){
+        if(data.hold){
+            child.exec('lp -i '+data.id+' -H resume', function (error, stdout, stderr) {
+                console.log(stdout);
+                console.log(stderr);
+            });
+        }else{
+            child.exec('lp -i '+data.id+' -H hold', function (error, stdout, stderr) {
+                console.log(stdout);
+                console.log(stderr);
+            });
+        }
+    });
+
+    // Socket de respuesta a cancelar trabajo i
+    socket.on('cancel', function (data){
+        child.exec('lprm '+data.id, function (error, stdout, stderr) {
+            console.log(stdout);
+            console.log(stderr);
+        });
+    });
+
+    // Socket de respuesta a cancelar todos los trabajos
+    socket.on('cancelAll', function (){
+        child.exec('lprm -', function (error, stdout, stderr) {
+            console.log(stdout);
+            console.log(stderr);
+        });
+    });
+
+    // Al desconectarnos debemos detener el envio periodico
+    socket.on('disconnect', function(){
+        clearInterval(ival);
+    });    
+});
 
 module.exports = app;

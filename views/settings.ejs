@@ -1,22 +1,24 @@
 <h2>Ajustes de Impresión</h2>
 
-<h3>EPSON Stylus DX7400</h3>
-<table>
-	<tr>
-		<td><u>Estado:</u> </td>
-		<td><span id="rdy"><%= ready || "pausada" %></span></td>
-		<td><button id="togglerdy" type="button" onclick="togrdy(<%=ready&&true%>)" >
-			<%= ready ? "Pausar Impresora" : "Reanudar Impresora" %>
-		</button></td>
-	</tr>
-	<tr>
-		<td><u>Cola de impresión:</u> </td>
-		<td><span id="acpt"><%= accept ? "Aceptando trabajos" : "Rechazando trabajos" %></span></td>
-		<td><button id="toggleacpt" type="button" onclick="togacpt(<%=accept%>)">
-			<%= accept ? "Rechazar trabajos" : "Aceptar trabajos" %>
-		</button></td>
-	</tr>
-</table>
+<div id="epson">
+	<h3>EPSON Stylus DX7400</h3>
+	<table>
+		<tr>
+			<td><u>Estado:</u> </td>
+			<td><span id="rdy"><%= ready || "pausada" %></span></td>
+			<td><button id="togglerdy" type="button" onclick="togrdy(<%=ready&&true%>)" >
+				<%= ready ? "Pausar Impresora" : "Reanudar Impresora" %>
+			</button></td>
+		</tr>
+		<tr>
+			<td><u>Cola de impresión:</u> </td>
+			<td><span id="acpt"><%= accept ? "Aceptando trabajos" : "Rechazando trabajos" %></span></td>
+			<td><button id="toggleacpt" type="button" onclick="togacpt(<%=accept%>)">
+				<%= accept ? "Rechazar trabajos" : "Aceptar trabajos" %>
+			</button></td>
+		</tr>
+	</table>
+</div>
 <hr />
 <div id="printjobs">
 	<h3>Cola de impresión</h3>
@@ -45,6 +47,33 @@
 	<button id="canceljobs" type="button" onclick="cancelAll()" >
 		Cancelar todos los trabajos
 	</button>
+</div>
+<hr />
+<div id="inklevels">
+	<h3>Niveles de tinta</h3>
+	<% if(inklevels.success){ %>
+		<table class="inktable">
+		    <tr>
+		        <th><h3>Cian</h3></th>
+		        <th><h3>Magenta</h3></th>
+		        <th><h3>Amarillo</h3></th>
+		        <th><h3>Negro</h3></th>
+		    </tr>
+		    <tr>
+		        <td><progress class="inkbar" id="cyanbar" value="<%= inklevels.cyan %>" max="100"></progress></td>
+		        <td><progress class="inkbar" id="magbar" value="<%= inklevels.magenta %>" max="100"></progress></td>
+		        <td><progress class="inkbar" id="yellbar" value="<%= inklevels.yellow %>" max="100"></progress></td>
+		        <td><progress class="inkbar" id="blackbar" value="<%= inklevels.black %>" max="100"></progress></td>
+		    </tr>
+		</table>
+		<br>
+		<p>Si alguno de los colores está completamente agotado tienes que cambiar el cartucho. 
+		Para saber cómo ve a <a href="/help#tinta">Cambio de cartuchos de tinta</a>.</p>
+	<% }else{ %>
+		<p>Ahora mismo no se puede acceder a los niveles de tinta de la impresora. Las causas más probables de esto es que la impresora 
+		se encuentre activa imprimiendo algún documento o que esté apagada. Vuelve a cargar la página dentro de un rato, cuando la
+		impresora se encuentre encendida y en reposo.</p>
+	<% } %>
 </div>
 <br>
 <br>

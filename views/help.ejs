@@ -5,15 +5,16 @@
 	<li><a href="#info">Información general</a></li>
 	<li><a href="#tech">Detalles técnicos</a></li>
 	<li><a href="#util">Utilidades</a>
-	<ul>
-		<li><a href="#tinta">Cambio de cartuchos de tinta</a></li>
-		<li><a href="#rev">Revisión de los cabezales</a></li>
-		<li><a href="#limp">Limpieza de cabezales</a></li>
-	</ul>
+		<ul>
+			<li><a href="#tinta">Cambio de cartuchos de tinta</a></li>
+			<li><a href="#rev">Revisión de los cabezales</a></li>
+			<li><a href="#limp">Limpieza de cabezales</a></li>
+		</ul>
 	</li>
 	<li><a href="#problemas">Solución de problemas de impresión</a></li>
 	<li><a href="#manual">Manual</a></li>
 	<li><a href="#cloud">Google Cloud Print</a></li>
+	<li><a href="#cups">Administrador CUPS</a></li>
 	<li><a href="#creditos">Créditos</a></li>
 </ul>
 <div id="info"><h2> Información general</h2>
@@ -58,7 +59,7 @@
 <ol>
 	<li>Comprueba que el archivo ha sido guardado en <a href="/print/files" target="_blank">Impresiones más recientes</a>.</li>
 	<li>Comprueba que la impresora está encendida.</li>
-	<li>Comprueba que la impresora está activada y aceptando trabajos, en el <a href="/settings#control" target="_blank">Panel de control</a> de la impresora.</li>
+	<li>Comprueba que la impresora no está pausada y que acepta trabajos, en el <a href="/settings#control" target="_blank">Panel de control</a> de la impresora.</li>
 	<li>Confirma que tu archivo aparece en la <a href="/settings#printjobs" target="_blank">Cola de impresión</a>, y que no aparece con estado "Pausado". Si esto es así, tu archivo debería estar imprimiéndose tan pronto como alcance el primer puesto de la cola.</li>
 	<li>Si aun así no se imprime, comprueba que los <a href="/settings#ink" target="_blank">Niveles de tinta</a> no están vacíos. Si alguno lo está, cámbialo tal y como se indica en <a href="#tinta">Cambio de cartuchos de tinta</a>.</li>
 </ol>
@@ -78,10 +79,24 @@
 <p>Para más información sobre Google Cloud Print consulta <a href="http://www.google.es/cloudprint/learn/" target="_blank">esta página</a>.</p>
 </div>
 <hr />
+<div id="cups"><h2>Administrador CUPS</h2>
+<a href="http://192.168.1.200:631/printers/EPSON_Stylus_DX7400" target="_blank">Accede al administrador de impresora CUPS</a>
+<p>CUPS es el sistema que controla la impresión desde la Raspberry Pi. Accediendo a esta página puedes administrar la impresora y cambiar sus parámetros de configuración con mayor libertad que en el <a href="/settings#control">Panel de control</a>. Una vez accedas al sistema, ten en cuenta estas consideraciones:</p>
+<ul>
+	<li>Es posible que aparezca un aviso diciendo que estás tratando de entrar a un sitio no seguro. Ignora el aviso y accede de todas maneras. En Chrome, tendrás que pulsar en <u>Opciones avanzadas</u> > <u>Acceder a 192.168.1.200 (sitio no seguro)</u>.</li>
+	<li>Si te pide usuario y contraseña para completar alguna acción, estas son las claves que debes meter:
+	<ul>
+		<li><b>Usuario:</b> pi</li>
+		<li><b>Contraseña:</b> rockandroll93</li>
+	</ul>
+	</li>
+</ul>
+</div>
+<hr />
 <div id="creditos"><h2>Créditos</h2>
 <p>Esta aplicación ha sido creada por Rodrigo Hernangómez para uso y disfrute de su familia. Los conocimientos acerca de la construcción de aplicaciones web han sido adquiridos en la asignatura de Computación en Red impartida en el tercer curso del Grado en Tecnologías y Servicios de Telecomunicación. Los conocimientos acerca de Unix y de la Raspberry Pi han sido adquiridos en la asignatura de Sistemas Digitales II del tercer curso del mismo grado, aunque mayoritariamente se ha trabajado de forma autodidacta ayudado por múltiples tutoriales de Internet.</p>
 <p>Espero que esto sirva para imprimir y escanear en casa de forma más rápida y que solucione más problemas de los que crea. Siento las molestias y trastornos a la hora de implantar este sistema, y confío en que nos acostumbremos de forma intuitiva a él.</p>
-<p>La actual versión de la aplicación es la 1.0, desarrollada entre los meses de mayo y junio de 2014.</p></div>
+<p>La primera versión fue desarrollada entre los meses de mayo y junio de 2014, pero se han ido añadiendo sucesivas mejoras, la última de ellas en enero de 2015.</p></div>
 
 <a href="/">Inicio</a>
 

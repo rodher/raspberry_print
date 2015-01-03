@@ -60,13 +60,13 @@ exports.print = function(req, res, next) {
     // Comprobamos que el formulario esta bien rellenado
     if(validate(printjob)){
 
+      // Enviamos respuesta
+      res.render("print/sent", { msg: fname+" enviado con éxito. Preparando archivo para imprimir."});
+
       //Ejecutamos el comando de impresion
       var print = child.spawn('./bin/print.sh', printjob);
       print.setMaxListeners(0); // Evitamos warning de memory leak
-      prints.push(print);       // Añadimos el comando a la pila
-
-      // Enviamos respuesta
-      res.render("print/sent", { msg: fname+" enviado con éxito. Preparando archivo para imprimir."});    
+      prints.push(print);       // Añadimos el comando a la pila    
     } else{
       next(new Error('Formulario mal rellenado'));
     }

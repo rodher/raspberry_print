@@ -80,6 +80,7 @@ var printsocket = io.of('/print').on('connection', function (socket){
     if(print){
         // Enviamos información a través del socket
         print.stdout.on('data', function (chunk) {
+          console.log(data);
           var data = chunk.toString(); // Convertimos de Buffer a String
           var progress = data.match(/[0-9]+/); // Comprobamos que se trata de progreso o no
           if(progress) socket.emit('progress', { progress: progress[0], id: socket.id });

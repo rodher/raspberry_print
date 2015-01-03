@@ -127,6 +127,7 @@ function cancelAll(){
 
 // Callback de progreso
 socket.on('progress', function (data) {
+	console.log(data.progress);
 	if(data.id===socket.io.engine.id){
 		$("progress").val(data.progress);
 		if(parseInt(data.progress)===parseInt($("progress").attr('max'))){ // Si llegamos al valor máximo
@@ -137,6 +138,7 @@ socket.on('progress', function (data) {
 
 // Callback de mensajes
 socket.on('message', function (data) {
+	console.log(data.msg);
 	if(data.id===socket.io.engine.id){
 		$("#msg").html(data.msg);
 	}

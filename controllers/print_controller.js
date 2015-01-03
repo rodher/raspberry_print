@@ -75,31 +75,6 @@ exports.print = function(req, res, next) {
   });
 };
 
-// GET /ink
-exports.inklevels = function(req,res, next){
-
-  //Ejecutamos comando de comprobacion de niveles de tinta
-  child.exec('ink -p usb', function (error, stdout, stderr) {
-
-    var inklevels ={success: true}; // Añadimos Variable para indicar si se han podido hallar niveles de tinta o no
-
-    console.log('ink stdout: ' + stdout);
-    console.log('ink stderr: ' + stderr);
-    if ( error || stdout.match(/Could\snot/) ) inklevels.success = false;
-    else{
-
-
-      // Rellenamos la informacion de nivel de los distintos colores
-      inklevels.cyan=stdout.match(/Cyan:[\s]+([0-9]+)%/)[1];
-      inklevels.magenta=stdout.match(/Magenta:[\s]+([0-9]+)%/)[1];
-      inklevels.yellow=stdout.match(/Yellow:[\s]+([0-9]+)%/)[1];
-      inklevels.black=stdout.match(/Photoblack:[\s]+([0-9]+)%/)[1]; 
-    }
-
-    res.render("ink",{inklevels: inklevels}); //Enviamos la respuesta
-  });
-};
-
 // GET /settings
 exports.settings= function(req,res, next){
 

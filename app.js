@@ -82,7 +82,7 @@ var printsocket = io.of('/print').on('connection', function (socket){
         //Ejecutamos el comando de impresion
         var print = child.spawn('./bin/print.sh', printjob);
         print.setMaxListeners(0); // Evitamos warning de memory leak
-        
+
         // Enviamos información a través del socket
         print.stdout.on('data', function (chunk) {
           var data = chunk.toString(); // Convertimos de Buffer a String
@@ -112,9 +112,13 @@ var addsocket = io.of('/scan/add').on('connection', function (socket){scanbase(s
 // Funcion base para los sockets de todas las distintas fases del escaneo
 var scanbase = function scanbase(socket){
 
-    var scan = scans.pop(); //Extraemos comando
+    var job = scans.pop(); //Extraemos lista de argumentos
 
-    if(scan){
+    if(job){
+
+        // Ejecutamos el comando de escaneado
+        var scan = child.spawn('./bin/scan.sh', job.scanjob);
+
         // Enviamos la salida de datos como mensajes en el cliente
         scan.stdout.on('data', function (chunk) {
             console.log(chunk.toString());
@@ -129,7 +133,7 @@ var scanbase = function scanbase(socket){
         });
         // Al cerrar avisamos de que el proceso ha terminado, con exito o no
         scan.on('exit',function(code){
-            var evt = scan.mode+"end"; // Determinamos evento del socket en funcion del formato de escaneo
+            var evt = job.mode+"end"; // Determinamos evento del socket en funcion del formato de escaneo
             console.log("Escaneo terminado con codigo "+code);
             if(code===0) socket.emit( evt, { success: true, id: socket.id});
             else socket.emit( evt, { success: false, id: socket.id});

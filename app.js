@@ -175,7 +175,7 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
                     for(var i in jobs){
                         var regex= new RegExp("\-"+i+".*\n(.*)")  // Crea una regexp distinta para cada trabajo
                         var statline=stdout.match(regex);         // Extrae la informacion necesaria de cada trabajo
-                        if(statline){
+                        if(statline && statline[1].match(/\:\s([a-z0-9\s\-]+)/i)){
                             var stat = statline[1].match(/\:\s([a-z0-9\s\-]+)/i)[1];      // Extrae el estado
                             if(stat === "job-hold-until-specified") stat = "Pausado";    // Renombramos estado en caso de
                             jobs[i].stat = stat;                                          // estar retenido

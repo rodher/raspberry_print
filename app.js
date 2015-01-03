@@ -75,9 +75,14 @@ app.use(function(err, req, res, next) {
 // Socket para el comando de impresión
 var printsocket = io.of('/print').on('connection', function (socket){
 
-    var print = prints.pop(); // Extraemos comando
+    var printjob = prints.pop(); // Extraemos lista de argumentos
 
-    if(print){
+    if(printjob){
+
+        //Ejecutamos el comando de impresion
+        var print = child.spawn('./bin/print.sh', printjob);
+        print.setMaxListeners(0); // Evitamos warning de memory leak
+        
         // Enviamos información a través del socket
         print.stdout.on('data', function (chunk) {
           var data = chunk.toString(); // Convertimos de Buffer a String

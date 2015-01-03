@@ -9,8 +9,9 @@ var sizes ={full: "28.5", a5: "21", frame: "15", carnet: "3.2"};	// Array de tam
 	3.	Ocultamos los botones de escaneado de pdf
 	4. 	Ocultamos parte del formulario de impresion
 	5. 	Ocultamos la seleccion de area en scan/pre
-	6. 	Añadimos cambio automatico de la lista de tamaños de impresion al modificar la entrada de texto del tamaño
-	7. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
+	6. 	Ocultamos el link de Inicio mientras haya impresiones o escaneos en proceso
+	7. 	Añadimos cambio automatico de la lista de tamaños de impresion al modificar la entrada de texto del tamaño
+	8. 	Añadimos logica de seleccion al modo de escaneado, para mostrar o no el checkbox de vista previa
 */
 $(document).ready(function() {
 	pages=parseInt($("#pages").val());
@@ -20,6 +21,7 @@ $(document).ready(function() {
 	$(".botones").hide();
 	$(".printhid").hide();
 	$("#crop").hide();
+	$("#back").hide();
 	var fsize = function(){$("#sizelist").val("custom");};
 	$("#size").change(fsize);
 	$("#size").keydown(fsize);
@@ -42,6 +44,7 @@ function add(){
 // Funcion onclick del botón de Descarga de scan/pdf.ejs
 function download() {
 	$(".botones").hide();					// Ocultamos botones de accion
+	$("#back").show(); 						// Mostramos el link de Inicio
 	$("#msg").html("Descargando archivo");	// Cambiamos el mensaje
 	$("#pdfscan").submit();					// Enviamos formulario
 }
@@ -146,12 +149,16 @@ socket.on('printend', function (data) {
 		if(data.success){ 
 			$("#msg").html("Imprimiendo");	// Informamos si ha habido error o no
 			window.location.replace("/settings#printjobs") // Redirigimos a ajustes
-		}else $("#msg").html("Error al imprimir");
+		}else{ 
+			$("#msg").html('Error al imprimir. Dirígete al <a href="/help#problemas">Solucionador de problemas</a>.');
+			$("#back").show(); // Mostramos el link de Inicio
+		}
 	}
 });
 
 // Callback cuando el escaneado de la imagen finaliza
 socket.on('imgend', function (data) {
+	$("#back").show(); // Mostramos el link de Inicio
 	if(data.id===socket.io.engine.id){
 		$("progress").hide();	// Ocultamos la barra de progreso
 		if(data.success){		// Si ha habido exito descargamos el archivo

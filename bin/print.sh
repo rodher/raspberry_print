@@ -100,7 +100,7 @@ fntLP()
 {
 
 	echo "Mandando impresión"
-	lp -o scaling=${size} -n ${ncopy} ${PRINT_DIR}/${file} &> ${LOG_DIR}/LP.log
+	lp -U pi -o scaling=${size} -n ${ncopy} ${PRINT_DIR}/${file} &> ${LOG_DIR}/LP.log
 	fntCheckErrors ${LOG_DIR}/LP.log
 	echo 3 # Tercer hito de progreso
 }

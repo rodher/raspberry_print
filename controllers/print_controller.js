@@ -6,7 +6,7 @@ var p_dir = "prints/";  // Directorio donde se almacenan las impresiones
 
 var printer = "EPSON_Stylus_DX7400"; // Impresora por defecto del sistema
 
-var prints=[];          // Pila de comandos a exportar
+var prints=[];          // Pila de argumentos de comando a exportar
 exports.prints = prints;
 
 // GET /print
@@ -62,13 +62,10 @@ exports.print = function(req, res, next) {
     // Comprobamos que el formulario esta bien rellenado
     if(validate(printjob)){
 
-      //Ejecutamos el comando de impresion
-      var print = child.spawn('./bin/print.sh', printjob);
-      print.setMaxListeners(0); // Evitamos warning de memory leak
-      prints.push(print);       // Añadimos el comando a la pila
+      prints.push(printjob);       // Añadimos la lista de argumentos a la pila   
 
       // Enviamos respuesta
-      res.render("print/sent", { msg: fname+" enviado con éxito. Preparando archivo para imprimir."});    
+      res.render("print/sent", { msg: fname+" enviado con éxito. Preparando archivo para imprimir."}); 
     } else{
       next(new Error('Formulario mal rellenado'));
     }

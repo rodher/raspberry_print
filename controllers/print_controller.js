@@ -100,15 +100,15 @@ exports.settings= function(req,res, next){
         console.log('jobs queue stdout: ' + stdout);
         console.log('jobs queue stderr: ' + stderr);
         if (error) next(error);
-        var jobstrings = stdout.match(/root[\s]+[0-9]+[\s]+[^\s]+/gm); // Obtiene lineas con los trabajos en un array
+        var jobstrings = stdout.match(/[a-z]+[\s]+[0-9]+[\s]+.+?\s+[0-9]+\sbytes$/gm); // Obtiene lineas con los trabajos en un array
         var jobs={};
         for(var i in jobstrings){
-          var jobparams = jobstrings[i].match(/root[\s]+([0-9]+)[\s]+([^\s]+)/); // Separa de cada trabajo el id y el nombre
+          var jobparams = jobstrings[i].match(/[a-z]+[\s]+([0-9]+)[\s]+(.+?)\s+[0-9]+\sbytes$/); // Separa de cada trabajo el id y el nombre
           jobs[jobparams[1]]={fname: jobparams[2]};
         }
 
         // Obtencion del estado de cada trabajo
-        child.exec('lpstat -l', function (error, stdout, stderr) {
+        child.exec('lpstat -l -U pi', function (error, stdout, stderr) {
           console.log('job status stdout: ' + stdout);
           console.log('job status stderr: ' + stderr);
           if (error) next(error);

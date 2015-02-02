@@ -178,7 +178,7 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
                 }
             }
             // Obtencion del estado de cada trabajo
-            child.exec('lpstat -l', function (error, stdout, stderr) {
+            child.exec('lpstat -l -U pi', function (error, stdout, stderr) {
                 if (!error) {
                     for(var i in jobs){
                         var regex= new RegExp("\-"+i+".*\n(.*)")  // Crea una regexp distinta para cada trabajo

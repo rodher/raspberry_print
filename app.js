@@ -170,10 +170,10 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
         // Obtencion de lista de trabajos
         child.exec('lpq', function (error, stdout, stderr) {
             if (!error){
-                var jobstrings = stdout.match(/root[\s]+[0-9]+[\s]+[^\s]+/gm); // Obtiene lineas con los trabajos en un array
+                var jobstrings = stdout.match(/[a-z]+[\s]+[0-9]+[\s]+.+?\s+[0-9]+\sbytes$/gm); // Obtiene lineas con los trabajos en un array
                 var jobs={};
                 for(var i in jobstrings){
-                    var jobparams = jobstrings[i].match(/root[\s]+([0-9]+)[\s]+([^\s]+)/); // Separa de cada trabajo el id y el nombre
+                    var jobparams = jobstrings[i].match(/[a-z]+[\s]+([0-9]+)[\s]+(.+?)\s+[0-9]+\sbytes$/); // Separa de cada trabajo el id y el nombre
                     jobs[jobparams[1]]={fname: jobparams[2]};
                 }
             }

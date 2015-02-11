@@ -149,20 +149,20 @@ var settingsocket = io.of('/settings').on('connection', function (socket){
         // Obtencion de enable/disable
         child.exec('lpstat -p', function (error, stdout, stderr) {
             if (!error){
-                var pstat = stdout.match(/está\s([a-z]+)/); // Obtencion de estado de la actividad de la impresora
-                if(pstat !== null){
-                  var ready;
-                  if(pstat[1]==="deshabilitada") ready=false; // Deshabilitada = pausada
-                  else ready=pstat[1];
-                  socket.emit('pstat', { ready: ready});
-                }
+                var ready;
+                // Obtencion de estado de la actividad de la impresora
+                if(stdout.match(/idle/)) ready = "Inactiva";
+                else if(stdout.match(/printing/)) ready = "Imprimiendo";
+                else if(stdout.match(/disabled/)) ready = false;
+                else ready = "Desconocido";
+                socket.emit('pstat', { ready: ready});
             }
         });
 
         // Obtencion de accepting/rejecting
         child.exec('lpstat -a', function (error, stdout, stderr) {
             if (!error){
-                var accept=stdout.match(/aceptando/); // Si el comando devuelve "aceptando", la impresora acepta trabajos
+                var accept=!(stdout.match(/not\saccepting/)); // Si el comando devuelve "aceptando", la impresora acepta trabajos
                 socket.emit('pacpt', {accept: accept});
             }
         });

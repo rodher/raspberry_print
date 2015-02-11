@@ -220,7 +220,7 @@ socket.on('pstat', function (data){
 
 	$("#togglerdy").off("click").click( function(){togrdy(data.ready&&true)}); //Cambiamos el parametro de la funcion onclick
 
-	$("#rdy").html(data.ready || "pausada");					// Cambiamos la informacion y el nombre del boton
+	$("#rdy").html(data.ready || "Pausada");					// Cambiamos la informacion y el nombre del boton
 	if(data.ready) $("#togglerdy").html("Pausar Impresora");
 	else $("#togglerdy").html("Reanudar Impresora");
 });

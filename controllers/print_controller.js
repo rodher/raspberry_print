@@ -80,20 +80,19 @@ exports.settings= function(req,res, next){
     console.log('printer stat stdout: ' + stdout);
     console.log('printer stat stderr: ' + stderr);
     if (error) next(error);
-    var pstat = stdout.match(/está\s([a-z]+)/); // Obtencion de estado de la actividad de la impresora
-    if(pstat=== null) next(new Error("No se puede acceder a la impresora"));
-    else{
-      var ready;
-      if(pstat[1]==="deshabilitada") ready=false;
-      else ready=pstat[1];
-    }
+    var ready;
+    // Obtencion de estado de la actividad de la impresora
+    if(stdout.match(/idle/)) ready = "Inactiva";
+    else if(stdout.match(/printing/)) ready = "Imprimiendo";
+    else if(stdout.match(/disabled/)) ready = false;
+    else ready = "Desconocido";
     
     // Obtencion de accepting/rejecting
     child.exec('lpstat -a', function (error, stdout, stderr) {
       console.log('printer stat stdout: ' + stdout);
       console.log('printer stat stderr: ' + stderr);
       if (error) next(error);
-      var accept=stdout.match(/aceptando/); // Si el comando devuelve "aceptando", la impresora acepta trabajos
+      var accept=!(stdout.match(/not\saccepting/)); // Si el comando devuelve "aceptando", la impresora acepta trabajos
 
       // Obtencion de lista de trabajos
       child.exec('lpq', function (error, stdout, stderr) {

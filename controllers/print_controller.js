@@ -115,12 +115,15 @@ exports.settings= function(req,res, next){
             var regex= new RegExp("\-"+i+".*\n(.*)")  // Crea una regexp distinta para cada trabajo
             var statline=stdout.match(regex);         // Extrae la informacion necesaria de cada trabajo
             if(statline){
-              var stat = statline[1].match(/\:\s([a-z0-9\s\-]+)/i)[1];      // Extrae el estado
-              if(stat === "job-hold-until-specified") stat = "Pausado";    // Renombramos estado en caso de estar retenido
-              jobs[i].stat = stat;
-              var prog = statline[1].match(/([0-9]+)\%/);                   // Extrae el progreso
-              if(prog) jobs[i].lvl = prog[1];                               // Si se encuentra progreso, se extrae,
-              else jobs[i].lvl = false;                                     // y si no se pone a false
+              var stat = statline[1].match(/\:\s([a-z0-9\s\-]+)/i);      // Extrae el estado
+              if(stat){
+                stat = stat[1];
+                if(stat === "job-hold-until-specified") stat = "Pausado";    // Renombramos estado en caso de estar retenido
+                jobs[i].stat = stat;
+                var prog = statline[1].match(/([0-9]+)\%/);                   // Extrae el progreso
+                if(prog) jobs[i].lvl = prog[1];                               // Si se encuentra progreso, se extrae,
+                else jobs[i].lvl = false;                                     // y si no se pone a false  
+              }else jobs[i].stat = "Unknown";
             }else jobs[i].stat = "Unknown";
           }
 
